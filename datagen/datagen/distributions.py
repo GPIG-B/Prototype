@@ -1,5 +1,6 @@
 import math
 import random
+from itertools import count
 from typing import Iterator
 
 from .config import Config
@@ -23,16 +24,19 @@ def make_temp_iter(cfg: Config) -> Iterator[float]:
     daily_iter = autocorr(period=cfg.ticks_per_day,
                           jitter=cfg.temp_jitter,
                           dist=daily_dist)
-    return isum(cfg.temp_mean, daily_iter, annual_iter)
+    mean_iter = (cfg.temp_mean for _ in count())
+    return isum(0., mean_iter, daily_iter, annual_iter)
 
 
 def make_wind_iter(cfg: Config) -> Iterator[Vec2]:
     angle_iter = autocorr(period=cfg.ticks_per_day,
                           jitter=cfg.wind_angle_jitter,
-                          dist=lambda _: random.random() * math.pi * 2)
+                          dist=lambda _: random.random() * math.pi * 4)
+    angle_iter = (x % (2 * math.pi) for x in angle_iter)
     mag_iter = autocorr(period=cfg.ticks_per_day,
                         jitter=cfg.wind_mag_jitter,
                         dist=lambda _: random.gauss(cfg.wind_mag_mean,
                                                     cfg.wind_mag_var))
+    mag_iter = (max(0, x) for x in mag_iter)
     wind_iter = map(Vec2, angle_iter, mag_iter)
     return wind_iter

@@ -3,7 +3,7 @@ import random
 import math
 from itertools import tee, count, islice
 from dataclasses import dataclass
-from typing import Callable, Iterator, Iterable, TypeVar, Tuple
+from typing import Callable, Iterator, Iterable, TypeVar, Tuple, Optional
 
 
 T = TypeVar('T')
@@ -51,14 +51,17 @@ def resample(xs: Iterator[T], original_len: int, target_len: int
         yield x
 
 
-def autocorr(period: int, jitter: float = 0.5,
-             dist: Callable[[float], float] = lambda _: random.random()
+def autocorr(period: int, jitter: float = 0.5, init: Optional[float] = None,
+             dist: Callable[[float], float] = lambda _: random.random(),
              ) -> Iterator[float]:
     """Returns an iterator with values drawn from `dist` that autocorrelate.
     The parameter `jitter` describes how closely the individual values follow
     the given distribution, regardless of previous values. I.e. for `jitter=1`,
     there is no autocorrelation, for `jitter=0`, each epoch is a linear
-    interpolation between two samples from the distribution."""
+    interpolation between two samples from the distribution.
+
+    `epoch` describes the number of correlated samples between two uncorrelated
+    samples."""
 
     def add_level(xs: Iterator[float], level: int, epoch: float
                   ) -> Iterator[float]:
@@ -77,7 +80,7 @@ def autocorr(period: int, jitter: float = 0.5,
         yield b
 
     n_levels = math.ceil(math.log2(period))
-    pivot = dist(0.)
+    pivot = init if init is not None else dist(0.)
     for epoch in count():
         next_pivot = dist(epoch + 1.)
         # The initial iterator with only the first and last sample (level 0)

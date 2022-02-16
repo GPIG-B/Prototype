@@ -1,8 +1,16 @@
+import dataclasses
+from watchdog.observers import Observer  # type: ignore
+from watchdog.events import FileSystemEventHandler  # type: ignore
 from dataclasses import dataclass
+from pathlib import Path
+import yaml
+import logging
+from typing import Any
 
 
-@dataclass(frozen=True)
+@dataclass
 class Config:
+    _ticks_per_second: float = 1.
     tick_freq: int = 60 * 60  # seconds
     # Wind
     wind_mag_mean: float = 5.5  # metres / second
@@ -34,3 +42,55 @@ class Config:
     @property
     def ticks_per_year(self) -> int:
         return int(356 * 24 * 60 * 60 / self.tick_freq)
+
+    @classmethod
+    def from_yaml(cls, path: Path, watch: bool = True) -> 'Config':
+        cfg = cls()._update_from_yaml(path)
+        if watch:
+            cfg._watch_yaml(path)
+        return cfg
+
+    def _update_from_yaml(self, path: Path) -> 'Config':
+        if not path.exists():
+            raise FileNotFoundError(f'File does not exist: {path}')
+        fields = {field.name: field.type
+                  for field in dataclasses.fields(Config)}
+        with open(path, 'r') as fh:
+            kwargs = yaml.safe_load(fh)
+        for key, value in kwargs.items():
+            if key not in fields:
+                raise ValueError(f'Unknown field: {key}, expected one of '
+                                 f'{list(fields.keys())}')
+            expected_type = fields[key]
+            # Allow basic arithmetic expressions (this is a security issue, but
+            # we trust the user input for now)
+            if isinstance(value, str) and expected_type in (int, float):
+                value = expected_type(eval(value))
+            if not isinstance(value, expected_type):
+                raise TypeError(f'Invalid type for field {key}: {type(value)},'
+                                f' expected {expected_type}')
+            old_value = getattr(self, key)
+            if old_value == value:
+                continue
+            logging.info(f'Changed field "{key}" from {old_value} to {value}')
+            setattr(self, key, value)
+        return self
+
+    def _watch_yaml(self, path: Path) -> None:
+        """Watch the config file for modifications and update the config's
+        value accordingly."""
+        if not path.exists():
+            raise FileNotFoundError(f'File does not exist: {path}')
+        observer = Observer()
+
+        class Handler(FileSystemEventHandler):  # type: ignore
+            def on_modified(self_, event: Any) -> None:
+                if Path(event.src_path) != path:
+                    return
+                try:
+                    self._update_from_yaml(path)
+                except (TypeError, ValueError) as e:
+                    logging.error(e)
+
+        observer.schedule(Handler(), path)
+        observer.start()

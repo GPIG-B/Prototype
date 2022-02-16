@@ -1,4 +1,4 @@
-SRC_FILES:=*.py datagen/
+SRC_FILES:=*.py common/
 .PHONY: all check lint clean
 
 

@@ -1,4 +1,4 @@
-SRC_FILES:=*.py datagen/
+SRC_FILES:=*.py sensor_service/
 .PHONY: all check lint clean
 
 

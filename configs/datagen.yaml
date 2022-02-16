@@ -1,0 +1,24 @@
+_ticks_per_second: 10.  # Only for the simulation loop
+tick_freq: 60 * 60  # seconds
+# Wind
+wind_mag_mean: 5.5  # metres / second
+wind_mag_var: 3.1
+wind_angle_jitter: 0.5
+wind_mag_jitter: 0.5
+# Temp
+temp_mean: 8.1  # degree Celsius
+temp_jitter: 0.5
+temp_annual_spread: 10.0  # degree Celsius
+temp_daily_spread: 7.0  # degree Celsius0
+temp_daily_std: 2.0  # degree Celsius.
+temp_annual_std: 2.0  # degree Celsius.
+# Factor to convert between wind metres/sec and rotor rotations/sec
+rotor_rps_wind_fact: 0.15
+rotor_rps_alpha: 0.9998
+rotor_rps_relative_var: 0.01
+tower_vib_freq_mean: 4300.0  # Hz
+tower_vib_freq_var: 240.0  # Hz
+# Generator temperature
+gen_temp_diff_mean: 2.0  # degree Celsius
+gen_temp_diff_var: 0.5  # degree Celsius
+gen_temp_alpha: 0.99999

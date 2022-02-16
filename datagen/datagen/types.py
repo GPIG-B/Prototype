@@ -1,17 +1,19 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Protocol, List, Dict, Union, Iterator, Any
+from typing import Protocol, List, Dict, Union, Iterator, Any, Callable
 import random
+import time
+import logging
 
 from .config import Config
 from .utils import rolling_avg, Vec2, id_factory
 from .distributions import make_temp_iter, make_wind_iter
 
 
-# The `Any` below should really be `ReadingsT`, but mypy does not support
+# The `Any`s below should really be `ReadingsT`, but mypy does not support
 # cyclic type definitions yet.
 ReadingT = Union[float, int, str, Dict[str, Any], List[Any]]
-ReadingsT = Dict[str, Union[ReadingT]]
+ReadingsT = Dict[str, ReadingT]
 
 
 @dataclass
@@ -20,6 +22,7 @@ class Simulation:
     wts: List[WindTurbine]
     env: Environment
     time: int = 0
+    running: bool = True
 
     def get_readings(self) -> ReadingsT:
         wt_readings = [wt.get_readings(self.env) for wt in self.wts]
@@ -30,11 +33,21 @@ class Simulation:
 
     def tick(self, n: int = 1) -> Simulation:
         for _ in range(n):
+            logging.info(f'Tick {self.time}')
             self.env.tick()
             for wt in self.wts:
                 wt.tick(self.env)
             self.time += 1
         return self
+
+    def loop(self, callback: Callable[[ReadingsT], None]) -> None:
+        logging.info('Simulation loop started')
+        while self.running:
+            readings = self.get_readings()
+            callback(readings)
+            self.tick()
+            time.sleep(1 / self.cfg._ticks_per_second)
+        logging.info('Simulation loop terminated')
 
 
 @dataclass
@@ -86,17 +99,27 @@ class WindTurbine:
         for comp in self.components:
             comp.tick(env)
 
+    @classmethod
+    def from_env(cls, env: Environment) -> WindTurbine:
+        return cls([Tower(env), Rotor(env), Generator(env)])
+
 
 @dataclass
 class Tower:
+    vib_freq: float
+
+    def __init__(self, env: Environment) -> None:
+        vib_freq = random.gauss(env.cfg.tower_vib_freq_mean,
+                                env.cfg.tower_vib_freq_var)
+        self.vib_freq = max(0, vib_freq)
 
     def get_readings(self, env: Environment) -> Dict[str, ReadingT]:
-        vib_freq = random.normalvariate(env.cfg.tower_vib_freq_mean,
-                                        env.cfg.tower_vib_freq_var)
-        vib_freq = max(0, vib_freq)
-        return dict(tower_vib_freq=vib_freq)
+        return dict(tower_vib_freq=self.vib_freq)
 
-    def tick(self, env: Environment) -> None: ...
+    def tick(self, env: Environment) -> None:
+        vib_freq = random.gauss(env.cfg.tower_vib_freq_mean,
+                                env.cfg.tower_vib_freq_var)
+        self.vib_freq = max(0, vib_freq)
 
 
 @dataclass

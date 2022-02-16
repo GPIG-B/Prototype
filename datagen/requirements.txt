@@ -2,3 +2,7 @@ mypy
 flake8
 jupyterlab
 matplotlib
+flask
+pyyaml
+types-PyYAML
+watchdog

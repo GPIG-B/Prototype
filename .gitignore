@@ -1,5 +1,5 @@
 .venv/
-notes.pdf
 .ipynb_checkpoints/
 .mypy_cache/
-datagen.egg-info/
+__pycache__/
+*.egg-info
