@@ -1,6 +1,6 @@
 SHELL=/bin/sh
 MAKE=make
-SUBDIRS=datagen/ common/ sensor_service/
+SUBDIRS=datagen/ common/ sensor_service/ drone_scheduling/ dashboard/
 .PHONY: clean
 
 

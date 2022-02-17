@@ -1,6 +1,8 @@
 -r datagen/requirements.txt
 -r common/requirements.txt
 -r sensor_service/requirements.txt
+-r drone_scheduling/requirements.txt
 -e ./datagen/
 -e ./common/
 -e ./sensor_service/
+-e ./drone_scheduling/
