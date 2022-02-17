@@ -11,19 +11,13 @@ class _GlobManager(BaseManager):
     pass
 
 
-class Node:
+class Server:
 
     def __init__(self, host: str, port: int, authkey: bytes) -> None:
         self.h = host
         self.p = port
         self.k = authkey
         self.manager = _GlobManager(address=(self.h, self.p), authkey=self.k)
-
-
-class Server(Node):
-
-    def __init__(self, host: str, port: int, authkey: bytes) -> None:
-        super(Server, self).__init__(host, port, authkey)
         logging.info(f'Attempting to create manager at {self.h}:{self.p}')
         self.ns = Namespace()
 
@@ -55,11 +49,14 @@ class Server(Node):
         return cls(h, p, k)
 
 
-class Client(Node):
+class Client:
 
     def __init__(self, name: str, host: str, port: int, authkey: bytes
                  ) -> None:
-        super(Client, self).__init__(host, port, authkey)
+        self.h = host
+        self.p = port
+        self.k = authkey
+        self.manager = _GlobManager(address=(self.h, self.p), authkey=self.k)
         self.name = name
         self.manager.register('get_ns', proxytype=NamespaceProxy)
         self.manager.register('on_connect_hook')
