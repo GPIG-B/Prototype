@@ -33,7 +33,7 @@ class Simulation:
 
     def tick(self, n: int = 1) -> Simulation:
         for _ in range(n):
-            logging.info(f'Tick {self.time}')
+            logging.debug(f'Tick {self.time}')
             self.env.tick()
             for wt in self.wts:
                 wt.tick(self.env)

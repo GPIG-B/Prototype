@@ -4,11 +4,11 @@ import random
 import logging
 import sys
 import json
-import threading
 from pathlib import Path
+from typing import Optional
 
 import datagen as dg
-import common
+import manager
 
 
 LOG_LEVELS = {1: logging.INFO, 2: logging.WARNING, 3: logging.ERROR}
@@ -22,6 +22,15 @@ def _existing_file(p: str) -> Path:
     return path
 
 
+def find_config() -> Optional[Path]:
+    str_paths = ['./configs/datagen.yaml', '../configs/datagen.yaml']
+    for str_path in str_paths:
+        path = Path(str_path)
+        if path.exists():
+            return path
+    return None
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
@@ -33,18 +42,15 @@ def main() -> None:
     # Parser for simulations
     sim_parser = argparse.ArgumentParser(add_help=False)
     sim_parser.add_argument('--config', type=_existing_file,
-                            default=Path('../configs/datagen.yaml'),
+                            default=find_config(),
                             help='The config file containing the simulation '
                                  'constants')
-    sim_parser.add_argument('--wts', type=int, default=3,
-                            help='The number of wind turbines to simulate')
     sim_parser.add_argument('--warmup', type=int, default=10,
                             help='Number of ticks to "warm up" the simulation '
                                  'after initialisation')
     # Parser for the global state manager
     gsm_parser = argparse.ArgumentParser(add_help=False)
-    gsm_parser.add_argument('--manager_host', type=str, default='127.0.0.1')
-    gsm_parser.add_argument('--manager_port', type=int, default=6789)
+    manager.add_manager_arguments(gsm_parser)
     # JSON action
     p = subparsers.add_parser('json', parents=[sim_parser])
     p.add_argument('--ticks', type=int, default=10,
@@ -60,13 +66,15 @@ def main() -> None:
     p.set_defaults(func=sim_action)
     # Parse arguments
     args = parser.parse_args()
+    # Check that a config exists
+    if hasattr(args, 'config') and args.config is None:
+        print('No config found or specified')
+        exit(1)
     # Check if an action was specified
     if not hasattr(args, 'func'):
         print('No action specified')
         parser.print_usage()
         exit(1)
-    m = '--wts must be greater than 0, got %d'
-    assert getattr(args, 'wts', 1) > 0, m % args.wts
     m = '--ticks must be greater than 0, got %d'
     assert getattr(args, 'ticks', 1) > 0, m % args.ticks
     # Logging config
@@ -88,7 +96,7 @@ def _build_sim(args: argparse.Namespace) -> dg.types.Simulation:
     cfg = dg.config.Config.from_yaml(args.config)
     env = dg.types.Environment.from_config(cfg)
     wts = [dg.types.WindTurbine.from_env(env)
-           for _ in range(args.wts)]
+           for _ in range(cfg.wts)]
     sim = dg.types.Simulation(cfg, wts, env)
     logging.info('Starting warmup')
     sim.tick(args.warmup)
@@ -105,29 +113,23 @@ def json_action(args: argparse.Namespace) -> None:
 
 
 def api_action(args: argparse.Namespace) -> None:
-    manager_addr = args.manager_host, args.manager_port
-    app = dg.api.standalone_app(manager_addr)
-    logging.info(f'Running API on {(args.host, args.port)}')
+    client = manager.Client.from_args('datagen_api', args)
+    app = dg.api.standalone_app(client)
+    logging.info(f'Running API on http://{args.host}:{args.port}')
     app.run(host=args.host, port=args.port)
 
 
 def sim_action(args: argparse.Namespace) -> None:
-    # Initialise the global state manager
-    manager_addr = args.manager_host, args.manager_port
-    ns, manager = common.init_global_manager(manager_addr)
-    # Initialise the simulation and its thread
-    sim = _build_sim(args)
+    # Get the global namespace
+    client = manager.Client.from_args('datagen_sim', args)
 
     def loop_callback(readings: dg.types.ReadingsT) -> None:
-        ns.last_readings = readings
+        """Write the simulation results to the global namespace."""
+        client.get_ns().last_readings = readings
 
-    sim_thread = threading.Thread(target=sim.loop, args=(loop_callback,))
-    sim_thread.daemon = True
-    logging.info('Starting simulation thread')
-    sim_thread.start()
-    # Start the manager
-    logging.info(f'Running manager on {manager_addr}')
-    manager.get_server().serve_forever()
+    # Initialise the simulation
+    sim = _build_sim(args)
+    sim.loop(loop_callback)
 
 
 if __name__ == '__main__':

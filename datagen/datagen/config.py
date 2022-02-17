@@ -11,6 +11,7 @@ from typing import Any
 @dataclass
 class Config:
     _ticks_per_second: float = 1.
+    wts: int = 3  # Number of wind turbines
     tick_freq: int = 60 * 60  # seconds
     # Wind
     wind_mag_mean: float = 5.5  # metres / second
@@ -72,7 +73,8 @@ class Config:
             old_value = getattr(self, key)
             if old_value == value:
                 continue
-            logging.info(f'Changed field "{key}" from {old_value} to {value}')
+            logging.info(f'Changed config field "{key}" from {old_value} to '
+                         f'{value}')
             setattr(self, key, value)
         return self
 

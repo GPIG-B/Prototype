@@ -1,11 +1,12 @@
 from multiprocessing.managers import Namespace
 import flask
-from typing import Tuple, cast
+from typing import cast, Optional
 
-import common
+import manager
 
 
 datagen_bp = flask.Blueprint('datagen', __name__)
+_cached_ns: Optional[Namespace] = None
 
 
 @datagen_bp.route('/readings')
@@ -14,22 +15,14 @@ def status() -> flask.Response:
 
 
 def get_ns() -> Namespace:
-    return cast(Namespace, flask.g.ns)
+    ns = flask.current_app.config['MANAGER_CLIENT'].get_ns()
+    return cast(Namespace, ns)
 
 
-@datagen_bp.before_request
-def _load_global_ns() -> None:
-    if not hasattr(flask.g, 'ns'):
-        manager_addr = flask.current_app.config['MANAGER_ADDR']
-        manager = common.connect_global_manager(manager_addr)
-        ns = manager.get_ns()  # type: ignore
-        flask.g.ns = ns
-
-
-def standalone_app(manager_addr: Tuple[str, int]) -> flask.Flask:
+def standalone_app(manager_client: manager.Client) -> flask.Flask:
     app = flask.Flask(__name__)
     app.config['DEBUG'] = True
     app.config['ENV'] = 'development'
-    app.config['MANAGER_ADDR'] = manager_addr
+    app.config['MANAGER_CLIENT'] = manager_client
     app.register_blueprint(datagen_bp)
     return app

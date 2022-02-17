@@ -1,4 +1,4 @@
-SRC_FILES:=*.py common/
+SRC_FILES:=*.py manager/
 .PHONY: all check lint clean
 
 

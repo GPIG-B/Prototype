@@ -7,7 +7,7 @@ activate it and run `pip install -r requirements.txt && mypy --install-types`.
 This will recursively install the dependencies for all subsystems (i.e. common,
 datagen, etc.).
 
-To run the simulation inside a docker container, install docker and
+To run the simulation inside docker containers, install docker and
 docker-compose and run `docker-compose up --build`. Check
 http://127.0.0.1:8080/readings for results. See ./datagen/README.md for more
 details.
@@ -26,11 +26,9 @@ details.
 ./drone_scheduling/:
 - Schedule and navigate the drones.
 
-./common/:
-- Common code, e.g. a globally shared namespace to communicate between the
-  different processes
+./manager/:
+- A globally shared namespace to communicate between the different processes
+- Management code to spin up the prototype
 
 ./configs/:
 - configuration files for all subsystems
-
-... More to come.
