@@ -3,14 +3,12 @@
 Please run `make` before each commit for type checking and linting.
 
 To install the dependencies, create a virtual environment (`virtualenv .venv`),
-activate it and run `pip install -r requirements.txt && mypy --install-types`.
-This will recursively install the dependencies for all subsystems (i.e. common,
-datagen, etc.).
+activate it and run `pip install -r requirements.txt && pip install -r
+requirements.local.txt && mypy --install-types`. This will recursively install
+the dependencies for all subsystems (i.e. common, datagen, etc.).
 
 To run the simulation inside docker containers, install docker and
-docker-compose and run `docker-compose up --build`. Check
-http://127.0.0.1:8080/readings for results. See ./datagen/README.md for more
-details.
+docker-compose and run `docker-compose up --build`.
 
 ## Subsystems
 
@@ -32,3 +30,6 @@ details.
 
 ./configs/:
 - configuration files for all subsystems
+
+./api/:
+- Expose the API to the dashboard
