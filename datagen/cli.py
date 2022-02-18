@@ -56,11 +56,6 @@ def main() -> None:
     p.add_argument('--ticks', type=int, default=10,
                    help='The number of ticks (timesteps) to simulate')
     p.set_defaults(func=json_action)
-    # API action
-    p = subparsers.add_parser('api', parents=[gsm_parser])
-    p.add_argument('--host', type=str, default='127.0.0.1')
-    p.add_argument('--port', '-p', type=int, default=8080)
-    p.set_defaults(func=api_action)
     # SIM action
     p = subparsers.add_parser('sim', parents=[sim_parser, gsm_parser])
     p.set_defaults(func=sim_action)
@@ -110,13 +105,6 @@ def json_action(args: argparse.Namespace) -> None:
         readings = sim.get_readings()
         sim.tick()
         sys.stdout.write(json.dumps(readings) + '\n')
-
-
-def api_action(args: argparse.Namespace) -> None:
-    client = manager.Client.from_args('datagen_api', args)
-    app = dg.api.standalone_app(client)
-    logging.info(f'Running API on http://{args.host}:{args.port}')
-    app.run(host=args.host, port=args.port)
 
 
 def sim_action(args: argparse.Namespace) -> None:

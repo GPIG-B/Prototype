@@ -18,12 +18,12 @@ services:
     links:
       - manager
 
-  datagen-api:
+  api:
     image: gpig
     build: .
     ports:
       - 8080:8080
-    command: /bin/sh ./datagen/entrypoint_api.sh
+    command: /bin/sh ./api/entrypoint.sh
     volumes:
       - ./configs/:/workdir/configs/
     links:

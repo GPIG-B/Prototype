@@ -1,0 +1,5 @@
+-e ./datagen/
+-e ./manager/
+-e ./sensor_service/
+-e ./drone_scheduling/
+-e ./api/
