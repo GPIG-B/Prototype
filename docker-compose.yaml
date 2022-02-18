@@ -12,7 +12,7 @@ services:
   datagen-sim:
     image: gpig
     build: .
-    command: /bin/sh ./datagen/entrypoint_sim.sh
+    command: /bin/sh ./datagen/entrypoint.sh
     volumes:
       - ./configs/:/workdir/configs/
     links:

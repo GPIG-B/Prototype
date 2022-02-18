@@ -2,5 +2,4 @@
 -r manager/requirements.txt
 -r sensor_service/requirements.txt
 -r drone_scheduling/requirements.txt
-
 -r api/requirements.txt
