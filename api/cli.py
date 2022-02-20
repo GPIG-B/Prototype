@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 import argparse
+import logging
 
 import manager
 import api
+
+
+logger = logging.getLogger('api')
 
 
 def main() -> None:
@@ -15,6 +19,7 @@ def main() -> None:
     args = parser.parse_args()
     # Logging config
     manager.common.init_logging(args)
+    logger.info(f'Loaded logging config from {args.logging_config}')
     # Start the server
     manager_client = manager.Client.from_args('api', args)
     app = api.build_app(manager_client, debug=True)

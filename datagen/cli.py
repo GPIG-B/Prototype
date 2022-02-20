@@ -10,6 +10,11 @@ import datagen as dg
 import manager
 
 
+_CFG_PATHS = [
+    '/dyn-configs/datagen.yaml',
+    './configs/datagen.yaml',
+    '../configs/datagen.yaml',
+]
 logger = logging.getLogger('datagen')
 
 
@@ -20,9 +25,8 @@ def main() -> None:
     parser.add_argument('--seed', type=int, default=None, help=msg)
     # Parser for simulations
     sim_parser = argparse.ArgumentParser(add_help=False)
-    cfg_paths = ['./configs/datagen.yaml', '../configs/datagen.yaml']
     sim_parser.add_argument('--config', type=manager.common._existing_file,
-                            default=manager.common.first_existing(cfg_paths),
+                            default=manager.common.first_existing(_CFG_PATHS),
                             help='The config file containing the simulation '
                                  'constants')
     sim_parser.add_argument('--warmup', type=int, default=10,
@@ -44,14 +48,14 @@ def main() -> None:
     args = parser.parse_args()
     # Initialise logging
     manager.common.init_logging(args)
+    logger.info(f'Loaded logging config from {args.logging_config}')
     # Check that a config exists
     if args.config is None:
-        print(f'No config found or specified, searched in {cfg_paths}')
+        logger.error(f'No config found or specified, searched in {_CFG_PATHS}')
         exit(1)
     # Check if an action was specified
     if not hasattr(args, 'func'):
-        print('No action specified')
-        parser.print_usage()
+        logger.error('No action specified')
         exit(1)
     m = '--ticks must be greater than 0, got %d'
     assert getattr(args, 'ticks', 1) > 0, m % args.ticks

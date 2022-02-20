@@ -6,7 +6,11 @@ from pathlib import Path
 from typing import Optional, List
 
 
-_LOGGING_CFG_PATHS = ['./configs/logging.yaml', '../configs/logging.yaml']
+_LOGGING_CFG_PATHS = [
+    './dyn-configs/logging.yaml',
+    './configs/logging.yaml',
+    '../configs/logging.yaml',
+]
 
 
 def _existing_file(p: str) -> Path:

@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.8'
 
 services:
 
@@ -6,6 +6,8 @@ services:
     image: gpig:latest
     build: .
     command: /bin/sh ./manager/entrypoint.sh
+    volumes:
+      - ./configs/:/dyn-configs/
 
   datagen-sim:
     image: gpig:latest
@@ -13,6 +15,8 @@ services:
     command: /bin/sh ./datagen/entrypoint.sh
     links:
       - manager
+    volumes:
+      - ./configs/:/dyn-configs/
 
   api:
     image: gpig:latest
@@ -22,3 +26,5 @@ services:
     command: /bin/sh ./api/entrypoint.sh
     links:
       - manager
+    volumes:
+      - ./configs/:/dyn-configs/
