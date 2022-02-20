@@ -6,15 +6,11 @@ services:
     image: gpig
     build: .
     command: /bin/sh ./manager/entrypoint.sh
-    volumes:
-      - ./configs/:/workdir/configs/
 
   datagen-sim:
     image: gpig
     build: .
     command: /bin/sh ./datagen/entrypoint.sh
-    volumes:
-      - ./configs/:/workdir/configs/
     links:
       - manager
 
@@ -24,7 +20,5 @@ services:
     ports:
       - 8080:8080
     command: /bin/sh ./api/entrypoint.sh
-    volumes:
-      - ./configs/:/workdir/configs/
     links:
       - manager
