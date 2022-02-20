@@ -3,14 +3,14 @@ version: '3.9'
 services:
 
   manager:
-    image: gpig
+    image: gpig:latest
     build: .
     command: /bin/sh ./manager/entrypoint.sh
     volumes:
       - ./configs/:/workdir/configs/
 
   datagen-sim:
-    image: gpig
+    image: gpig:latest
     build: .
     command: /bin/sh ./datagen/entrypoint.sh
     volumes:
@@ -19,7 +19,7 @@ services:
       - manager
 
   api:
-    image: gpig
+    image: gpig:latest
     build: .
     ports:
       - 8080:8080

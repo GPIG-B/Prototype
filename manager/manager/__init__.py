@@ -6,6 +6,11 @@ import logging
 import argparse
 import time
 
+from . import common  # noqa: F401
+
+
+logger = logging.getLogger('manager')
+
 
 class _GlobManager(BaseManager):
     pass
@@ -18,29 +23,29 @@ class Server:
         self.p = port
         self.k = authkey
         self.manager = _GlobManager(address=(self.h, self.p), authkey=self.k)
-        logging.info(f'Attempting to create manager at {self.h}:{self.p}')
+        logger.info(f'Attempting to create manager at {self.h}:{self.p}')
         self.ns = Namespace()
 
         def _get_ns(client_name: str) -> Namespace:
             msg = f'Client in {client_name} retrieved global namespace'
-            logging.debug(msg)
+            logger.debug(msg)
             return self.ns
 
         def _on_connect_hook(client_name: str) -> None:
-            logging.info(f'Client {client_name} connected')
+            logger.info(f'Client "{client_name}" connected')
 
         def _on_disconnect_hook(client_name: str) -> None:
-            logging.info(f'Client {client_name} disconnected')
+            logger.info(f'Client "{client_name}" disconnected')
 
         self.manager.register('get_ns', callable=_get_ns,
                               proxytype=NamespaceProxy)
         self.manager.register('on_connect_hook', callable=_on_connect_hook)
         self.manager.register('on_disconnect_hook',
                               callable=_on_disconnect_hook)
-        logging.info('Success')
+        logger.info('Success')
 
     def run(self) -> None:
-        logging.info(f'Running manager on {self.h}:{self.p}')
+        logger.info(f'Running manager on {self.h}:{self.p}')
         self.manager.get_server().serve_forever()
 
     @classmethod
@@ -84,11 +89,11 @@ class Client:
             try:
                 self.manager.connect()
                 self.manager.on_connect_hook(self.name)  # type: ignore
-                logging.info(f'Connected to manager as {self.name}')
+                logger.info(f'Connected to manager as "{self.name}"')
                 break
             except ConnectionRefusedError:
-                logging.warning('Failed to connect to manager, attempt '
-                                f'{attempt + 1}/{attempts}')
+                logger.warning('Failed to connect to manager, attempt '
+                               f'{attempt + 1}/{attempts}')
                 time.sleep(1)
         else:
             raise ConnectionRefusedError('Could not connect to the manager')

@@ -2,33 +2,15 @@
 import argparse
 import random
 import logging
+import logging.config
 import sys
 import json
-from pathlib import Path
-from typing import Optional
 
 import datagen as dg
 import manager
 
 
-LOG_LEVELS = {1: logging.INFO, 2: logging.WARNING, 3: logging.ERROR}
-LOG_FORMAT = '%(asctime)s %(levelname)s: %(message)s'
-
-
-def _existing_file(p: str) -> Path:
-    path = Path(p)
-    if not path.exists():
-        raise FileNotFoundError(f'File does not exist: {p}')
-    return path
-
-
-def find_config() -> Optional[Path]:
-    str_paths = ['./configs/datagen.yaml', '../configs/datagen.yaml']
-    for str_path in str_paths:
-        path = Path(str_path)
-        if path.exists():
-            return path
-    return None
+logger = logging.getLogger('datagen')
 
 
 def main() -> None:
@@ -36,18 +18,17 @@ def main() -> None:
     subparsers = parser.add_subparsers()
     msg = 'Seed of the random number generator'
     parser.add_argument('--seed', type=int, default=None, help=msg)
-    parser.add_argument('--quiet', '-q', help='Quiet mode (additive)',
-                        action='count', default=1)
-    parser.add_argument('--logfile', '-log', type=Path, default=None)
     # Parser for simulations
     sim_parser = argparse.ArgumentParser(add_help=False)
-    sim_parser.add_argument('--config', type=_existing_file,
-                            default=find_config(),
+    cfg_paths = ['./configs/datagen.yaml', '../configs/datagen.yaml']
+    sim_parser.add_argument('--config', type=manager.common._existing_file,
+                            default=manager.common.first_existing(cfg_paths),
                             help='The config file containing the simulation '
                                  'constants')
     sim_parser.add_argument('--warmup', type=int, default=10,
                             help='Number of ticks to "warm up" the simulation '
                                  'after initialisation')
+    manager.common.add_logging_args(parser)
     # Parser for the global state manager
     gsm_parser = argparse.ArgumentParser(add_help=False)
     manager.add_manager_arguments(gsm_parser)
@@ -61,9 +42,11 @@ def main() -> None:
     p.set_defaults(func=sim_action)
     # Parse arguments
     args = parser.parse_args()
+    # Initialise logging
+    manager.common.init_logging(args)
     # Check that a config exists
-    if hasattr(args, 'config') and args.config is None:
-        print('No config found or specified')
+    if args.config is None:
+        print(f'No config found or specified, searched in {cfg_paths}')
         exit(1)
     # Check if an action was specified
     if not hasattr(args, 'func'):
@@ -72,14 +55,6 @@ def main() -> None:
         exit(1)
     m = '--ticks must be greater than 0, got %d'
     assert getattr(args, 'ticks', 1) > 0, m % args.ticks
-    # Logging config
-    if args.logfile is not None:
-        args.logfile.parent.mkdir(parents=True, exist_ok=True)
-        args.logfile.touch()
-    logging.basicConfig(
-            format=LOG_FORMAT,
-            level=LOG_LEVELS[args.quiet],
-            filename=args.logfile)
     # RNG seed
     if args.seed is not None:
         random.seed(args.seed)
@@ -93,9 +68,9 @@ def _build_sim(args: argparse.Namespace) -> dg.types.Simulation:
     wts = [dg.types.WindTurbine.from_env(env)
            for _ in range(cfg.wts)]
     sim = dg.types.Simulation(cfg, wts, env)
-    logging.info('Starting warmup')
+    logger.info('Starting warmup')
     sim.tick(args.warmup)
-    logging.info('Done')
+    logger.info('Done')
     return sim
 
 

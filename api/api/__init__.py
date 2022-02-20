@@ -22,7 +22,7 @@ def get_ns() -> Namespace:
 
 def build_app(manager_client: manager.Client, debug: bool = False
               ) -> flask.Flask:
-    app = flask.Flask(__name__)
+    app = flask.Flask('GPIG-api')
     app.register_blueprint(api_bp)
     app.register_blueprint(datagen.api.datagen_bp)
     app.config['MANAGER_CLIENT'] = manager_client

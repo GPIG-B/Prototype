@@ -8,6 +8,9 @@ import logging
 from typing import Any
 
 
+logger = logging.getLogger('datagen')
+
+
 @dataclass
 class Config:
     _ticks_per_second: float = 1.
@@ -73,8 +76,8 @@ class Config:
             old_value = getattr(self, key)
             if old_value == value:
                 continue
-            logging.info(f'Changed config field "{key}" from {old_value} to '
-                         f'{value}')
+            logger.info(f'Changed config field "{key}" from {old_value} to '
+                        f'{value}')
             setattr(self, key, value)
         return self
 
@@ -92,7 +95,7 @@ class Config:
                 try:
                     self._update_from_yaml(path)
                 except (TypeError, ValueError) as e:
-                    logging.error(e)
+                    logger.error(e)
 
         observer.schedule(Handler(), path)
         observer.start()

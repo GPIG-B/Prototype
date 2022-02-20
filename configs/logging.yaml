@@ -1,0 +1,35 @@
+version: 1
+
+formatters:
+  simple:
+    format: '%(asctime)s %(name)s %(levelname)s: %(message)s'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: simple
+    stream: ext://sys.stdout
+
+loggers:
+  manager:
+    level: INFO
+    handlers: [console]
+    propagate: no
+  datagen:
+    level: INFO
+    handlers: [console]
+    propagate: no
+  api:
+    level: INFO
+    handlers: [console]
+    propagate: no
+  # The default handler used by werkzeug, the library underlying flask
+  werkzeug:
+    level: INFO
+    handlers: [console]
+    propagate: no
+
+root:
+  level: INFO
+  handlers: [console]

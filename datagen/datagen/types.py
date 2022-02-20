@@ -10,6 +10,9 @@ from .utils import rolling_avg, Vec2, id_factory
 from .distributions import make_temp_iter, make_wind_iter
 
 
+logger = logging.getLogger('datagen')
+
+
 # The `Any`s below should really be `ReadingsT`, but mypy does not support
 # cyclic type definitions yet.
 ReadingT = Union[float, int, str, Dict[str, Any], List[Any]]
@@ -33,7 +36,7 @@ class Simulation:
 
     def tick(self, n: int = 1) -> Simulation:
         for _ in range(n):
-            logging.debug(f'Tick {self.time}')
+            logger.debug(f'Tick {self.time}')
             self.env.tick()
             for wt in self.wts:
                 wt.tick(self.env)
@@ -41,13 +44,13 @@ class Simulation:
         return self
 
     def loop(self, callback: Callable[[ReadingsT], None]) -> None:
-        logging.info('Simulation loop started')
+        logger.info('Simulation loop started')
         while self.running:
             readings = self.get_readings()
             callback(readings)
             self.tick()
             time.sleep(1 / self.cfg._ticks_per_second)
-        logging.info('Simulation loop terminated')
+        logger.info('Simulation loop terminated')
 
 
 @dataclass
