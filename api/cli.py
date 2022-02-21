@@ -23,6 +23,7 @@ def main() -> None:
     p = subparsers.add_parser('dev')
     p.set_defaults(func=dev_action)
     p = subparsers.add_parser('deploy')
+    p.add_argument('--workers', type=int, default=2)
     p.set_defaults(func=deploy_action)
     # Parse arguments
     args = parser.parse_args()
@@ -40,6 +41,7 @@ def dev_action(args: argparse.Namespace) -> None:
 
 
 def deploy_action(args: argparse.Namespace) -> None:
+    assert args.workers >= 1
     env = os.environ.copy()
     env['MANAGER_HOST'] = args.manager_host
     env['MANAGER_PORT'] = str(args.manager_port)
@@ -47,6 +49,8 @@ def deploy_action(args: argparse.Namespace) -> None:
     env['LOGGING_CONFIG'] = str(args.logging_config)
     cmd = ['gunicorn',
            '--bind', f'{args.host}:{args.port}',
+           '--workers', str(args.workers),
+           '--log-level', str(logger.level),
            'wsgi:app']
     subprocess.run(cmd, env=env)
 

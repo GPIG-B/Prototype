@@ -2,3 +2,7 @@ mypy
 flake8
 flask
 gunicorn
+
+# This works both in the repository directly and in the docker container
+-e ../manager/
+-e ../datagen/

@@ -11,4 +11,5 @@ $DIR/cli.py \
     --port 8080 \
     --manager_host manager \
     --manager_port 6789 \
-    deploy
+    deploy \
+    --workers 2
