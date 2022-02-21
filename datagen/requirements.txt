@@ -1,8 +1,9 @@
 mypy
 flake8
-jupyterlab
-matplotlib
 flask
 pyyaml
 types-PyYAML
 watchdog
+
+# This works both in the repository directly and in the docker container
+-e ../manager/

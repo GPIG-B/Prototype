@@ -3,27 +3,30 @@ version: '3.8'
 services:
 
   manager:
-    image: gpig:latest
-    build: .
-    command: /bin/sh ./manager/entrypoint.sh
+    image: gpig-manager:latest
+    build:
+      context: .
+      dockerfile: ./manager/Dockerfile
     volumes:
       - ./configs/:/dyn-configs/
 
   datagen-sim:
-    image: gpig:latest
-    build: .
-    command: /bin/sh ./datagen/entrypoint.sh
+    image: gpig-datagen:latest
+    build:
+      context: .
+      dockerfile: ./datagen/Dockerfile
     links:
       - manager
     volumes:
       - ./configs/:/dyn-configs/
 
   api:
-    image: gpig:latest
-    build: .
+    image: gpig-api:latest
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
     ports:
       - 8080:8080
-    command: /bin/sh ./api/entrypoint.sh
     links:
       - manager
     volumes:
