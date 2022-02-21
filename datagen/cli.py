@@ -25,7 +25,7 @@ def main() -> None:
     parser.add_argument('--seed', type=int, default=None, help=msg)
     # Parser for simulations
     sim_parser = argparse.ArgumentParser(add_help=False)
-    sim_parser.add_argument('--config', type=manager.common._existing_file,
+    sim_parser.add_argument('--config', type=manager.common.existing_file,
                             default=manager.common.first_existing(_CFG_PATHS),
                             help='The config file containing the simulation '
                                  'constants')

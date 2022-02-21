@@ -1,12 +1,15 @@
 import flask
+import os
+import logging
 from multiprocessing.managers import Namespace
-from typing import cast
+from typing import cast, Optional, Callable, TypeVar
 
 import manager
 import datagen
 
 
 api_bp = flask.Blueprint('api', __name__)
+logger = logging.getLogger('api')
 
 
 @api_bp.route('/', methods=['GET'])
@@ -20,11 +23,43 @@ def get_ns() -> Namespace:
     return cast(Namespace, ns)
 
 
-def build_app(manager_client: manager.Client, debug: bool = False
-              ) -> flask.Flask:
+T = TypeVar('T')
+
+
+def _get_env_var(key: str, typ: Callable[[str], T]) -> T:
+    if key not in os.environ:
+        raise OSError(f'Environment variable not set: "{key}"')
+    return typ(os.environ[key])
+
+
+def dev_app(manager_client: Optional[manager.Client]) -> flask.Flask:
+    logger.info('Using passed manager client')
+    # instantiate the flask app
     app = flask.Flask('GPIG-api')
     app.register_blueprint(api_bp)
     app.register_blueprint(datagen.api.datagen_bp)
     app.config['MANAGER_CLIENT'] = manager_client
-    app.config['DEBUG'] = debug
+    app.config['DEBUG'] = True
+    app.config['ENV'] = 'development'
+    return app
+
+
+def deployment_app() -> flask.Flask:
+    logging_cfg = _get_env_var('LOGGING_CONFIG', manager.common.existing_file)
+    manager.common.init_logging(logging_cfg)
+    logger.info('Attempting to construct manager client from environment '
+                'variables')
+    # Set up the manager client
+    h = _get_env_var('MANAGER_HOST', str)
+    p = _get_env_var('MANAGER_PORT', int)
+    k = _get_env_var('MANAGER_AUTHKEY', str.encode)
+    manager_client = manager.Client('api', h, p, k)
+    logger.info('Success')
+    # Initialise the app
+    app = flask.Flask('GPIG-api')
+    app.register_blueprint(api_bp)
+    app.register_blueprint(datagen.api.datagen_bp)
+    app.config['MANAGER_CLIENT'] = manager_client
+    app.config['DEBUG'] = False
+    app.config['ENV'] = 'development'
     return app
