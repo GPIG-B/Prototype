@@ -4,6 +4,7 @@ from typing import Protocol, List, Dict, Union, Iterator, Any, Callable
 import random
 import time
 import logging
+from datetime import timedelta
 
 from .config import Config
 from .utils import rolling_avg, Vec2, id_factory
@@ -24,23 +25,26 @@ class Simulation:
     cfg: Config = field(repr=False)
     wts: List[WindTurbine]
     env: Environment
-    time: int = 0
+    ticks: int = 0
+    duration: timedelta = field(default_factory=timedelta)
     running: bool = True
 
     def get_readings(self) -> ReadingsT:
         wt_readings = [wt.get_readings(self.env) for wt in self.wts]
-        readings: ReadingsT = dict(time=self.time,
+        readings: ReadingsT = dict(ticks=self.ticks,
+                                   duration=str(self.duration),
                                    **self.env.get_readings(),
                                    wts=wt_readings)
         return readings
 
     def tick(self, n: int = 1) -> Simulation:
         for _ in range(n):
-            logger.debug(f'Tick {self.time}')
+            logger.debug(f'Tick {self.ticks}')
             self.env.tick()
             for wt in self.wts:
                 wt.tick(self.env)
-            self.time += 1
+            self.ticks += 1
+            self.duration += timedelta(seconds=self.cfg.tick_freq)
         return self
 
     def loop(self, callback: Callable[[ReadingsT], None]) -> None:

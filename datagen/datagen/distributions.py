@@ -4,7 +4,7 @@ from itertools import count
 from typing import Iterator
 
 from .config import Config
-from .utils import autocorr, Vec2, isum
+from .utils import Autocorr, Vec2, isum
 
 
 def make_temp_iter(cfg: Config) -> Iterator[float]:
@@ -18,25 +18,25 @@ def make_temp_iter(cfg: Config) -> Iterator[float]:
         daily = daily * 0.5 * cfg.temp_daily_spread
         return random.gauss(daily, cfg.temp_daily_std)
 
-    annual_iter = autocorr(period=cfg.ticks_per_year,
-                           jitter=cfg.temp_jitter,
-                           dist=annual_dist)
-    daily_iter = autocorr(period=cfg.ticks_per_day,
-                          jitter=cfg.temp_jitter,
-                          dist=daily_dist)
+    annual_iter = Autocorr(dist=annual_dist,
+                           alpha=0.1, beta=5,
+                           increment=1 / cfg.ticks_per_year)
+    daily_iter = Autocorr(dist=daily_dist,
+                          alpha=0.5, beta=10,
+                          increment=1 / cfg.ticks_per_day)
     mean_iter = (cfg.temp_mean for _ in count())
     return isum(0., mean_iter, daily_iter, annual_iter)
 
 
 def make_wind_iter(cfg: Config) -> Iterator[Vec2]:
-    angle_iter = autocorr(period=cfg.ticks_per_day,
-                          jitter=cfg.wind_angle_jitter,
-                          dist=lambda _: random.random() * math.pi * 4)
-    angle_iter = (x % (2 * math.pi) for x in angle_iter)
-    mag_iter = autocorr(period=cfg.ticks_per_day,
-                        jitter=cfg.wind_mag_jitter,
-                        dist=lambda _: random.gauss(cfg.wind_mag_mean,
-                                                    cfg.wind_mag_var))
-    mag_iter = (max(0, x) for x in mag_iter)
+    angle_autocorr = Autocorr(dist=lambda _: random.random() * math.pi * 4,
+                              alpha=0.5, beta=10,
+                              increment=1 / cfg.ticks_per_day)
+    angle_iter = (x % (2 * math.pi) for x in angle_autocorr)
+    mag_autocorr = Autocorr(dist=lambda _: random.gauss(cfg.wind_mag_mean,
+                                                        cfg.wind_mag_var),
+                            alpha=0.5, beta=10,
+                            increment=1 / cfg.ticks_per_day)
+    mag_iter = (max(0, x) for x in mag_autocorr)
     wind_iter = map(Vec2, angle_iter, mag_iter)
     return wind_iter
