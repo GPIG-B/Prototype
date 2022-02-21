@@ -26,13 +26,13 @@ class Simulation:
     wts: List[WindTurbine]
     env: Environment
     ticks: int = 0
-    duration: timedelta = field(default_factory=timedelta)
+    uptime: timedelta = field(default_factory=timedelta)
     running: bool = True
 
     def get_readings(self) -> ReadingsT:
         wt_readings = [wt.get_readings(self.env) for wt in self.wts]
         readings: ReadingsT = dict(ticks=self.ticks,
-                                   duration=str(self.duration),
+                                   uptime=str(self.uptime),
                                    **self.env.get_readings(),
                                    wts=wt_readings)
         return readings
@@ -44,7 +44,7 @@ class Simulation:
             for wt in self.wts:
                 wt.tick(self.env)
             self.ticks += 1
-            self.duration += timedelta(seconds=self.cfg.tick_freq)
+            self.uptime += timedelta(seconds=self.cfg.tick_freq)
         return self
 
     def loop(self, callback: Callable[[ReadingsT], None]) -> None:
