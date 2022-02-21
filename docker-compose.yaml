@@ -31,3 +31,11 @@ services:
       - manager
     volumes:
       - ./configs/:/dyn-configs/
+
+  dashboard:
+    image: gpig-dashboard:latest
+    build:
+      context: .
+      dockerfile: ./dashboard/Dockerfile
+    ports:
+      - 3000:3000
