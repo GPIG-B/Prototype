@@ -1,9 +1,10 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Protocol, List, Dict, Union, Iterator, Any, Callable
+from typing import Protocol, List, Dict, Union, Iterator, Any, Callable, Type
 import random
 import time
 import logging
+from abc import ABC
 from datetime import timedelta
 
 from .config import Config
@@ -92,27 +93,75 @@ class Component(Protocol):
 
 
 @dataclass
+class Fault(ABC):
+    wt: WindTurbine
+
+    def bofore_tick(self) -> None:
+        pass
+
+    def after_tick(self) -> None:
+        pass
+
+    def __str__(self) -> str:
+        return self.__class__.__name__
+
+
+# Contains the fault types and their associated probabilities
+_wt_fault_types: Dict[Type[Fault], float] = dict()
+
+
+@dataclass
 class WindTurbine:
-    components: List[Component]
+    tower: Tower
+    rotor: Rotor
+    generator: Generator
+    faults: List[Fault] = field(default_factory=list)
     id: int = field(default_factory=id_factory('wt'))
 
     def get_readings(self, env: Environment) -> Dict[str, ReadingT]:
-        readings: ReadingsT = dict(wt_id=self.id)
+        readings: ReadingsT = dict(
+            wt_id=self.id,
+            _faults=[str(fault) for fault in self.faults],
+        )
         for comp in self.components:
             readings.update(comp.get_readings(env))
         return readings
 
     def tick(self, env: Environment) -> None:
+        # Call `before_tick` hooks on faults
+        for fault in self.faults:
+            fault.bofore_tick()
+        # Advance each component
         for comp in self.components:
             comp.tick(env)
+        # Potentially add new faults to the wind turbine
+        for fault_cls, prob in _wt_fault_types.items():
+            if random.random() < prob * env.cfg.tick_freq:
+                new_fault = fault_cls(self)
+                logger.info(f'WT[{self.id}]: New fault {new_fault}')
+                self.faults.append(new_fault)
+        # Call `after_tick` hooks on faults
+        for fault in self.faults:
+            fault.after_tick()
 
     @classmethod
     def from_env(cls, env: Environment) -> WindTurbine:
-        return cls([Tower(env), Rotor(env), Generator(env)])
+        return cls(Tower(env), Rotor(env), Generator(env))
+
+    @property
+    def components(self) -> List[Component]:
+        return [self.tower, self.rotor, self.generator]
+
+    @classmethod
+    def wt_fault(cls, prob: float) -> Callable[[Type[Fault]], Type[Fault]]:
+        def wrapper(fault_cls: Type[Fault]) -> Type[Fault]:
+            _wt_fault_types[fault_cls] = prob
+            return fault_cls
+        return wrapper
 
 
 @dataclass
-class Tower:
+class Tower(Component):
     vib_freq: float
 
     def __init__(self, env: Environment) -> None:
@@ -120,7 +169,7 @@ class Tower:
                                 env.cfg.tower_vib_freq_var)
         self.vib_freq = max(0, vib_freq)
 
-    def get_readings(self, env: Environment) -> Dict[str, ReadingT]:
+    def get_readings(self, _: Environment) -> Dict[str, ReadingT]:
         return dict(tower_vib_freq=self.vib_freq)
 
     def tick(self, env: Environment) -> None:
@@ -130,13 +179,13 @@ class Tower:
 
 
 @dataclass
-class Rotor:
+class Rotor(Component):
     rps: float
 
     def __init__(self, env: Environment) -> None:
         self.rps = env.wind.mag * env.cfg.rotor_rps_wind_fact
 
-    def get_readings(self, env: Environment) -> Dict[str, ReadingT]:
+    def get_readings(self, _: Environment) -> Dict[str, ReadingT]:
         return dict(rotor_rps=self.rps)
 
     def tick(self, env: Environment) -> None:
@@ -147,14 +196,26 @@ class Rotor:
         self.rps = max(0, rps)
 
 
+@WindTurbine.wt_fault(1e-5)
 @dataclass
-class Generator:
+class RotorBladeSurfaceCrack(Fault):
+    rps_factor: float = 0.9
+
+    def after_tick(self) -> None:
+        self.wt.rotor.rps *= self.rps_factor
+
+    def __str__(self) -> str:
+        return f'{self.__class__.__name__}[rps_factor={self.rps_factor:0.5}]'
+
+
+@dataclass
+class Generator(Component):
     temp: float
 
     def __init__(self, env: Environment) -> None:
         self.temp = env.temp
 
-    def get_readings(self, env: Environment) -> Dict[str, ReadingT]:
+    def get_readings(self, _: Environment) -> Dict[str, ReadingT]:
         return dict(generator_temp=self.temp)
 
     def tick(self, env: Environment) -> None:
