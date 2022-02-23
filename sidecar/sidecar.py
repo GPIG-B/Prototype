@@ -2,6 +2,8 @@
 import flask
 import argparse
 import subprocess
+import threading
+from typing import Iterator
 
 
 def main() -> None:
@@ -17,7 +19,7 @@ def main() -> None:
     ])
 
 
-def git_pull_and_restart() -> None:
+def git_pull_and_restart() -> Iterator[str]:
     yield '<h3>DO NOT REFRESH THIS PAGE</h3>'
     yield 'Pulling latest commit...<br>'
     subprocess.run(['git', 'pull', 'origin', 'master'])
@@ -37,6 +39,11 @@ def git_pull_and_restart() -> None:
     return
 
 
+def _git_pull_and_restart_eager() -> None:
+    for _ in git_pull_and_restart():
+        pass
+
+
 sidecar_bp = flask.Blueprint('sidecar', __name__)
 
 
@@ -44,15 +51,21 @@ sidecar_bp = flask.Blueprint('sidecar', __name__)
 def index() -> flask.Response:
     return flask.Response('''
             <h1>GPIG prototype webhook endpoint</h1>
-            <form action="/webhook" method="post">
+            <form action="/manual" method="post">
                 <button type="submit">Manual push</button>
             </form>
     ''')
 
 
-@sidecar_bp.route('/webhook', methods=['GET', 'POST'])
-def webhook() -> flask.Response:
+@sidecar_bp.route('/manual', methods=['POST'])
+def manual() -> flask.Response:
     return flask.Response(git_pull_and_restart(), 200)
+
+
+@sidecar_bp.route('/webhook', methods=['POST'])
+def webhook() -> flask.Response:
+    threading.Thread(target=_git_pull_and_restart_eager, daemon=False).start()
+    return flask.Response('success', 200)
 
 
 def build_app() -> flask.Flask:
