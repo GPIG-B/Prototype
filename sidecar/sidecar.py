@@ -13,7 +13,7 @@ def main() -> None:
         'gunicorn',
         '--bind', f'{args.host}:{args.port}',
         '--timeout', str(5 * 60),
-        'wsgi:app',
+        'sidecar:build_app()',
     ])
 
 
