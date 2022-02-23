@@ -19,6 +19,8 @@ services:
       - manager
     volumes:
       - ./configs/:/dyn-configs/
+    depends_on:
+      - manager
 
   api:
     image: gpig-api:latest
@@ -31,6 +33,9 @@ services:
       - manager
     volumes:
       - ./configs/:/dyn-configs/
+    depends_on:
+      - manager
+      - datagen-sim
 
   dashboard:
     image: gpig-dashboard:latest
@@ -39,3 +44,5 @@ services:
       dockerfile: ./dashboard/Dockerfile
     ports:
       - 80:3000
+    depends_on:
+      - api
