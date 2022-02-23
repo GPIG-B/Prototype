@@ -25,18 +25,12 @@ def git_pull_and_restart() -> Iterator[str]:
     subprocess.run(['git', 'pull', 'origin', 'master'])
     yield 'Rebuilding docker images...<br>'
     subprocess.run(['docker-compose', 'build'])
-    try:
-        yield 'Stopping old docker containers...<br>'
-        subprocess.run(['docker-compose', 'down'])
-    except Exception as e:
-        yield 'Failed, see logs'
-        raise e
-    finally:
-        yield 'Starting new docker containers...<br>'
-        subprocess.run(['docker-compose', 'up', '--detach'])
+    yield 'Stopping old docker containers...<br>'
+    subprocess.run(['docker-compose', 'down'])
+    yield 'Starting new docker containers...<br>'
+    subprocess.run(['docker-compose', 'up', '--detach'])
     yield 'Success<br>'
     yield '<a href="/">Go back</a>'
-    return
 
 
 def _git_pull_and_restart_eager() -> None:
