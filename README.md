@@ -2,10 +2,7 @@
 
 Please run `make` before each commit for type checking and linting.
 
-To install the dependencies, create a virtual environment (`virtualenv .venv`),
-activate it and run `pip install -r requirements.txt && pip install -r
-requirements.local.txt && mypy --install-types`. This will recursively install
-the dependencies for all subsystems (i.e. common, datagen, etc.).
+For that, you need mypy and flake8 (`pip install mypy flake8 && mypy --install-types`).
 
 To run the simulation inside docker containers, install docker and
 docker-compose and run `docker-compose up --build`.
