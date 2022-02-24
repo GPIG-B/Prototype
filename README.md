@@ -2,7 +2,7 @@
 
 Please run `make` before each commit for type checking and linting.
 
-For that, you need mypy and flake8 (`pip install mypy flake8 && mypy --install-types`).
+For that, you need mypy and flake8 (`pip install mypy flake8 && mypy --install-types`). Additionally, install the requirements specified in each of the subsystems (./\*/requirements.txt).
 
 To run the simulation inside docker containers, install docker and
 docker-compose and run `docker-compose up --build`.
