@@ -7,8 +7,6 @@ services:
     build:
       context: .
       dockerfile: ./manager/Dockerfile
-    volumes:
-      - ./configs/:/dyn-configs/
 
   datagen-sim:
     image: gpig-datagen:latest
@@ -17,8 +15,6 @@ services:
       dockerfile: ./datagen/Dockerfile
     links:
       - manager
-    volumes:
-      - ./configs/:/dyn-configs/
     depends_on:
       - manager
 
@@ -31,8 +27,6 @@ services:
       - 8080:8080
     links:
       - manager
-    volumes:
-      - ./configs/:/dyn-configs/
     depends_on:
       - manager
       - datagen-sim

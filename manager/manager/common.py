@@ -8,6 +8,7 @@ from typing import Optional, List, Union
 
 _LOGGING_CFG_PATHS = [
     '/dyn-configs/logging.yaml',
+    '/configs/logging.yaml',
     './configs/logging.yaml',
     '../configs/logging.yaml',
 ]

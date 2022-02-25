@@ -10,6 +10,7 @@ import manager
 
 _CFG_PATHS = [
     '/dyn-configs/datagen.yaml',
+    '/configs/datagen.yaml',
     './configs/datagen.yaml',
     '../configs/datagen.yaml',
 ]

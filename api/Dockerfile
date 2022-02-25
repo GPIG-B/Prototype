@@ -13,4 +13,5 @@ ADD ./api/requirements.txt ./
 RUN pip install -r requirements.txt
 ADD ./api/ ./
 RUN chmod +x ./cli.py ./entrypoint.sh
+ADD ./configs/ /configs/
 ENTRYPOINT ./entrypoint.sh
