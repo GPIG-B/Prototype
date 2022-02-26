@@ -1,15 +1,15 @@
 FROM python:3
 
-WORKDIR /workdir/
-# TODO: do this with a wildcard?
-ADD ./datagen/requirements.txt ./datagen/
-ADD ./api/requirements.txt ./api/
-ADD ./sensor_service/requirements.txt ./sensor_service/
-ADD ./manager/requirements.txt ./manager/
-ADD ./drone_scheduling/requirements.txt ./drone_scheduling/
-ADD ./requirements.txt ./
+# IMPORTANT: This Dockerfile expects to be run from the root of the repository
+# and _not_ from within ./drone_scheduling/!
+
+ADD ./manager/ /manager/
 RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
-ADD ./ ./
-RUN pip install -r requirements.local.txt
-RUN chmod +x $(find -name cli.py)
+    pip install -r /manager/requirements.txt
+WORKDIR /workdir/
+ADD ./drone_scheduling/requirements.txt ./
+RUN pip install -r requirements.txt
+ADD ./drone_scheduling/ ./
+RUN chmod +x ./cli.py ./entrypoint.sh
+ADD ./configs/ /configs/
+ENTRYPOINT ./entrypoint.sh
