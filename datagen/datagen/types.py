@@ -31,6 +31,7 @@ class Simulation:
     running: bool = True
 
     def get_readings(self) -> ReadingsT:
+        # This is what will be written to the central Namespace
         wt_readings = [wt.get_readings(self.env) for wt in self.wts]
         readings: ReadingsT = dict(ticks=self.ticks,
                                    uptime=str(self.uptime),
@@ -196,7 +197,7 @@ class Rotor(Component):
         self.rps = max(0, rps)
 
 
-@WindTurbine.wt_fault(1e-5)
+@WindTurbine.wt_fault(1e-7)
 @dataclass
 class RotorBladeSurfaceCrack(Fault):
     rps_factor: float = 0.9
