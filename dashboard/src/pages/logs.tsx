@@ -152,7 +152,7 @@ export default function Logs() {
 
 					return true
 				})
-				.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime()),
+				.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()),
 		[statusFilterValue]
 	)
 

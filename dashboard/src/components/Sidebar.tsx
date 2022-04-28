@@ -58,6 +58,11 @@ const Sidebar = () => {
 						href="/"
 					/>
 					<NavItem
+						title="Logs"
+						icon={<BellIcon />}
+						href="/logs"
+					/>
+					<NavItem
 						title="Turbines"
 						icon={<TurbineIcon />}
 						href="/turbines"
@@ -73,11 +78,6 @@ const Sidebar = () => {
 						icon={<SettingsIcon />}
 						href="/settings"
 					/> */}
-					<NavItem
-						title="Logs"
-						icon={<BellIcon />}
-						href="/logs"
-					/>
 				</nav>
 			</div>
 		</div>

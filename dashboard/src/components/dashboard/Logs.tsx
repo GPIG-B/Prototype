@@ -77,24 +77,6 @@ const logs: LogProps[] = [
 			'Lorem ipsum dolor sit amet consectetur adipiscing elit, morbi vitae auctor odio',
 		timestamp: new Date(1650705327000),
 	},
-	{
-		type: 'info',
-		message:
-			'Lorem ipsum dolor sit amet consectetur adipiscing elit, morbi vitae auctor odio',
-		timestamp: new Date(1650705087000),
-	},
-	{
-		type: 'failure',
-		message:
-			'Lorem ipsum dolor sit amet consectetur adipiscing elit, morbi vitae auctor odio',
-		timestamp: new Date(1650705087000),
-	},
-	{
-		type: 'warning',
-		message:
-			'Lorem ipsum dolor sit amet consectetur adipiscing elit, morbi vitae auctor odio',
-		timestamp: new Date(1648830633000),
-	},
 ]
 
 const styles = {
