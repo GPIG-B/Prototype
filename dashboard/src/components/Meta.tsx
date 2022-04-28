@@ -9,7 +9,7 @@ interface MetaProps {
 
 const Meta = ({ title, children }: MetaProps) => (
 	<Head>
-		<title>{title || 'Prototype GPIG-B'}</title>
+		<title>{title || 'GPIG-B Prototype'}</title>
 
 		{/* Favicon */}
 		<link

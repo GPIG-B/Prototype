@@ -115,7 +115,6 @@ const Map = () => {
 
 	return (
 		<div className="w-full h-full">
-			<Meta title="Map | Prototype GPIG-B" />
 			<GoogleMapReact
 				bootstrapURLKeys={{
 					key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
