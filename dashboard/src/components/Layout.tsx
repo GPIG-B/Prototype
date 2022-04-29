@@ -4,7 +4,7 @@ import Sidebar from '@/components/Sidebar'
 const styles = {
 	container:
 		'w-full h-screen flex flex-row flex-nowrap items-stretch overflow-hidden',
-	wrapper: 'flex-1 overflow-x-hidden overflow-y-auto',
+	wrapper: 'flex-1 overflow-x-hidden overflow-y-auto max-w-[125rem] mx-auto',
 }
 
 const Layout = ({ children }: { children: React.ReactNode }) => (

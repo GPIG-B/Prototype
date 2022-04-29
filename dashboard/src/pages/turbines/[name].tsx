@@ -37,7 +37,7 @@ const styles: Record<string, string> = {
 	doughnutContainer: 'w-full flex-1 flex flex-col justify-center relative',
 	doughnutValue:
 		'font-semibold text-[1.75rem] text-blue-gray-600 absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2',
-	doughnutRange: 'flex flex-row justify-between items-center',
+	doughnutRange: 'flex flex-row justify-between items-center mx-[10%]',
 }
 
 styles.doughnut = styles.graph + ' flex flex-col'
