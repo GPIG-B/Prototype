@@ -30,3 +30,20 @@ docker-compose and run `docker-compose up --build`.
 
 ./api/:
 - Expose the API to the dashboard
+
+## Update server (GCP)
+
+SSH into the machine and run:
+
+    git pull
+    # To reattach to the screen session running in the background
+    screen -r
+    # To stop the server
+    Ctrl+c
+    # Rebuild the images with the newest changes and run them
+    sudo docker compose up --build
+    # To detach from the screen session
+    Ctrl+a d
+    # If the screen session fails, run:
+    screen
+    # ... to start a new one
