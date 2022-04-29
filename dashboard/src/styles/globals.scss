@@ -76,4 +76,15 @@
 		border-radius: 6px;
 		border: 0px none #ffffff;
 	}
+
+	/* Page progress bar style */
+	#nprogress {
+		$color: #3661ed;
+		.bar {
+			background-color: $color !important;
+		}
+		.peg {
+			box-shadow: 0 0 10px $color, 0 0 5px $color !important;
+		}
+	}
 }
