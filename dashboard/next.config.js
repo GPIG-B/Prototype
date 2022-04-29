@@ -2,7 +2,7 @@
 const nextConfig = {
 	reactStrictMode: true,
 	poweredByHeader: false,
-	webpack(config, { dev }) {
+	webpack(config) {
 		// SVGR config
 		config.module.rules.push({
 			test: /\.svg$/,

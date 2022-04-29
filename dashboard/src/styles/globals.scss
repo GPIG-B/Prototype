@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	html {
+		font-family: Roboto, system-ui, sans-serif;
+	}
+
+	h1 {
+		@apply font-medium;
+		@apply text-[1.75rem];
+		@apply text-blue-gray-600;
+		@apply mb-[3.25rem];
+	}
+
+	input {
+		-webkit-appearance: none;
+		outline: none;
+		border: none;
+	}
+
+	table,
+	caption,
+	tbody,
+	tfoot,
+	thead,
+	tr,
+	th,
+	td {
+		margin: 0;
+		padding: 0;
+		border: 0;
+		outline: 0;
+		font-size: 100%;
+		vertical-align: baseline;
+		background: transparent;
+		font-weight: inherit;
+	}
+
+	td {
+		vertical-align: middle;
+	}
+
+	.wrapper {
+		padding: 3.5rem 3.5rem 1.5rem;
+		max-width: 125rem;
+		margin: 0 auto;
+	}
+
+	.svg-fill-inherit * {
+		fill: inherit;
+	}
+
+	.svg-stroke-inherit * {
+		stroke: inherit;
+	}
+
+	.dropdown-shadow {
+		box-shadow: 0 0.25rem 1.375rem -0.125rem rgba(0, 0, 0, 0.25);
+	}
+
+	/* Scrollbar style */
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: theme('colors.blue-600') theme('colors.blue-100');
+	}
+	*::-webkit-scrollbar {
+		width: 6px;
+	}
+	*::-webkit-scrollbar-track {
+		background: theme('colors.blue-100');
+	}
+	*::-webkit-scrollbar-thumb {
+		background-color: theme('colors.blue-600');
+		border-radius: 6px;
+		border: 0px none #ffffff;
+	}
+
+	/* Page progress bar style */
+	#nprogress {
+		$color: #3661ed;
+		.bar {
+			background-color: $color !important;
+		}
+		.peg {
+			box-shadow: 0 0 10px $color, 0 0 5px $color !important;
+		}
+	}
+}

@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
-import LogoVector from '@/public/logo.svg'
-import DashboardVector from '@/public/dashboard.svg'
-import TurbineVector from '@/public/turbine.svg'
-import DroneVector from '@/public/drone.svg'
-import MapVector from '@/public/map.svg'
-import SettingsVector from '@/public/settings.svg'
+import LogoIcon from '@/public/logo.svg'
+import DashboardIcon from '@/public/dashboard.svg'
+import TurbineIcon from '@/public/turbine.svg'
+import DroneIcon from '@/public/drone.svg'
+import MapIcon from '@/public/map.svg'
+import SettingsIcon from '@/public/settings.svg'
+import BellIcon from '@/public/bell.svg'
 
 interface NavItemProps {
 	title: string
@@ -20,9 +21,9 @@ const styles = {
 	logo: 'w-12 ml-4',
 	navWrapper: 'mt-16 flex flex-col w-56 gap-2',
 	navItem:
-		'px-4 h-12 flex flex-row items-center rounded-lg text-blue-gray-600 fill-blue-gray-600 font-medium hover:bg-blue-200 duration-200',
-	navItemIcon: 'w-5 mr-4',
-	navItemActive: 'text-blue-600 bg-blue-200 fill-blue-600',
+		'px-4 h-12 flex flex-row items-center rounded-lg text-blue-gray-600 fill-blue-gray-600 font-medium hover:bg-blue-100 duration-200',
+	navItemIcon: 'w-5 mr-4 svg-fill-inherit',
+	navItemActive: 'text-blue-600 bg-blue-100 fill-blue-600',
 }
 
 const Sidebar = () => {
@@ -47,31 +48,36 @@ const Sidebar = () => {
 		<div className={styles.wrapper}>
 			<div>
 				<div className={styles.logo}>
-					<LogoVector />
+					<LogoIcon />
 				</div>
 
 				<nav className={styles.navWrapper}>
 					<NavItem
 						title="Dashboard"
-						icon={<DashboardVector />}
+						icon={<DashboardIcon />}
 						href="/"
 					/>
 					<NavItem
+						title="Logs"
+						icon={<BellIcon />}
+						href="/logs"
+					/>
+					<NavItem
 						title="Turbines"
-						icon={<TurbineVector />}
+						icon={<TurbineIcon />}
 						href="/turbines"
 					/>
 					<NavItem
 						title="Drones"
-						icon={<DroneVector />}
+						icon={<DroneIcon />}
 						href="/drones"
 					/>
-					<NavItem title="Map" icon={<MapVector />} href="/map" />
-					<NavItem
+					<NavItem title="Map" icon={<MapIcon />} href="/map" />
+					{/* <NavItem
 						title="Settings"
-						icon={<SettingsVector />}
+						icon={<SettingsIcon />}
 						href="/settings"
-					/>
+					/> */}
 				</nav>
 			</div>
 		</div>
