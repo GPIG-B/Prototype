@@ -24,11 +24,11 @@ def git_pull_and_restart() -> Iterator[str]:
     yield 'Pulling latest commit...<br>'
     subprocess.run(['git', 'pull', 'origin', 'master'])
     yield 'Rebuilding docker images...<br>'
-    subprocess.run(['docker-compose', 'build'])
+    subprocess.run(['docker compose', 'build'])
     yield 'Stopping old docker containers...<br>'
-    subprocess.run(['docker-compose', 'down'])
+    subprocess.run(['docker compose', 'down'])
     yield 'Starting new docker containers...<br>'
-    subprocess.run(['docker-compose', 'up', '--detach'])
+    subprocess.run(['docker compose', 'up', '--detach'])
     yield 'Success<br>'
     yield '<a href="/">Go back</a>'
 
