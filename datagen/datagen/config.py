@@ -34,6 +34,8 @@ class Config:
     # Generator temperature
     gen_temp_diff_mean: float = 2.0  # degree Celsius
     gen_temp_diff_var: float = 0.5  # degree Celsius
+    # Data
+    history_length: int = 1024  # in ticks
 
     @property
     def ticks_per_day(self) -> float:

@@ -9,18 +9,18 @@ datagen_bp = flask.Blueprint('datagen', __name__)
 
 @datagen_bp.route('/readings')
 def readings() -> flask.Response:
-    return flask.jsonify(get_ns().last_readings)
+    return flask.jsonify(get_ns().readings_queue)
 
 
 @datagen_bp.route('/wind-turbines', methods=['GET'])
 def wind_turbines_list() -> flask.Response:
-    return flask.jsonify(get_ns().last_readings['wts'])
+    return flask.jsonify(get_ns().readings_queue[-1]['wts'])
 
 
 @datagen_bp.route('/wind-turbines/<int:wt_id>', methods=['GET'])
 def wind_turbines_detail(wt_id: int) -> flask.Response:
     assert isinstance(wt_id, int)
-    readings = get_ns().last_readings['wts']
+    readings = get_ns().readings_queue[-1]['wts']
     filtered = [wt for wt in readings if wt['wt_id'] == wt_id]
     if not filtered:
         return flask.jsonify({'msg': 'Not found'}, 404)
@@ -30,7 +30,7 @@ def wind_turbines_detail(wt_id: int) -> flask.Response:
 
 @datagen_bp.route('/env-sensors', methods=['GET'])
 def env_readings() -> flask.Response:
-    readings = copy(get_ns().last_readings)
+    readings = copy(get_ns().readings_queue[-1])
     del readings['wts']
     return flask.jsonify(readings)
 
