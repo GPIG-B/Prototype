@@ -35,6 +35,11 @@ def env_readings() -> flask.Response:
     return flask.jsonify(readings)
 
 
+@datagen_bp.route('/map', methods=['GET'])
+def map_() -> flask.Response:
+    return flask.jsonify(get_ns().map_cfg)
+
+
 def get_ns() -> Namespace:
     ns = flask.current_app.config['MANAGER_CLIENT'].get_ns()
     return cast(Namespace, ns)

@@ -1,6 +1,4 @@
 import dataclasses
-from watchdog.observers import Observer  # type: ignore
-from watchdog.events import FileSystemEventHandler  # type: ignore
 from dataclasses import dataclass
 from pathlib import Path
 import yaml
@@ -29,7 +27,6 @@ class Config:
     temp_daily_std: float = 2.0  # degree Celsius.
     temp_annual_std: float = 2.0  # degree Celsius.
     # Factor to convert between wind metres/sec and rotor rotations/sec
-    rotor_rps_wind_fact: float = 0.15
     rotor_rps_alpha: float = 0.9998
     rotor_rps_relative_var: float = 0.01
     tower_vib_freq_mean: float = 4.3e3  # Hz
@@ -37,15 +34,18 @@ class Config:
     # Generator temperature
     gen_temp_diff_mean: float = 2.0  # degree Celsius
     gen_temp_diff_var: float = 0.5  # degree Celsius
-    gen_temp_alpha: float = 0.99999
 
     @property
-    def ticks_per_day(self) -> int:
-        return int(24 * 60 * 60 / self.tick_freq)
+    def ticks_per_day(self) -> float:
+        return 24 * 60 * 60 / self.tick_freq
 
     @property
-    def ticks_per_year(self) -> int:
-        return int(356 * 24 * 60 * 60 / self.tick_freq)
+    def ticks_per_minute(self) -> float:
+        return 60 / self.tick_freq
+
+    @property
+    def ticks_per_year(self) -> float:
+        return 356 * 24 * 60 * 60 / self.tick_freq
 
     @classmethod
     def from_yaml(cls, path: Path, watch: bool = True) -> 'Config':
@@ -84,6 +84,9 @@ class Config:
     def _watch_yaml(self, path: Path) -> None:
         """Watch the config file for modifications and update the config's
         value accordingly."""
+        from watchdog.observers import Observer  # type: ignore
+        from watchdog.events import FileSystemEventHandler  # type: ignore
+
         if not path.exists():
             raise FileNotFoundError(f'File does not exist: {path}')
         observer = Observer()

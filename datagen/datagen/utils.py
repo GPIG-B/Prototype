@@ -38,15 +38,15 @@ def isum(acc: T, *its: Iterable[T]) -> Iterator[T]:
 _NEXT_IDS = dict()
 
 
-def id_factory(namespace: str) -> Callable[[], int]:
+def id_factory(namespace: str) -> Callable[[], str]:
     if namespace in _NEXT_IDS:
         raise ValueError(f'Duplicate id namespace: {namespace}')
     _NEXT_IDS[namespace] = 0
 
-    def factory() -> int:
+    def factory() -> str:
         id = _NEXT_IDS[namespace]
         _NEXT_IDS[namespace] += 1
-        return id
+        return f'{namespace}-{str(id).zfill(6)}'
 
     return factory
 
@@ -76,3 +76,13 @@ class Autocorr:
 
     def __iter__(self) -> Iterator[float]:
         return self
+
+
+def smooth_step(x: float, offset: float = 0., width: float = 1.) -> float:
+    """https://en.wikipedia.org/wiki/Smoothstep"""
+    if x < offset:
+        return 0.
+    if x > offset + width:
+        return 1.
+    x = (x - offset) / width
+    return 3 * x**2 - 2 * x**3
