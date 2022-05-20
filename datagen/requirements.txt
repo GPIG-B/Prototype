@@ -1,6 +1,7 @@
 mypy
 flake8
 flask
+flask-cors
 pyyaml
 types-PyYAML
 watchdog

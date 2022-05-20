@@ -3,7 +3,7 @@ import os
 import logging
 from multiprocessing.managers import Namespace
 from typing import cast, Optional, Callable, TypeVar
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin  # type: ignore
 
 import manager
 import datagen
@@ -14,6 +14,7 @@ logger = logging.getLogger('api')
 
 
 @api_bp.route('/', methods=['GET'])
+@cross_origin()
 def index() -> flask.Response:
     routes = [str(r) for r in flask.current_app.url_map.iter_rules()]
     return flask.jsonify(msg='Running', routes=routes)
