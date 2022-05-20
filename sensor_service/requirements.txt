@@ -1,2 +1,7 @@
 mypy
 flake8
+
+xgboost
+pandas
+
+-e ../manager/

@@ -18,6 +18,16 @@ services:
     depends_on:
       - manager
 
+  sensor-service:
+    image: gpig-sensor-service:latest
+    build:
+      context: .
+      dockerfile: ./sensor_service/Dockerfile
+    links:
+      - manager
+    depends_on:
+      - manager
+
   api:
     image: gpig-api:latest
     build:
