@@ -17,9 +17,8 @@ def wind_turbines_list() -> flask.Response:
     return flask.jsonify(get_ns().readings_queue[-1]['wts'])
 
 
-@datagen_bp.route('/wind-turbines/<int:wt_id>', methods=['GET'])
-def wind_turbines_detail(wt_id: int) -> flask.Response:
-    assert isinstance(wt_id, int)
+@datagen_bp.route('/wind-turbines/<wt_id>', methods=['GET'])
+def wind_turbines_detail(wt_id: str) -> flask.Response:
     readings = get_ns().readings_queue[-1]['wts']
     filtered = [wt for wt in readings if wt['wt_id'] == wt_id]
     if not filtered:

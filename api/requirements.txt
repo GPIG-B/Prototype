@@ -1,6 +1,7 @@
 mypy
 flake8
 flask
+flask-cors
 gunicorn
 
 # This works both in the repository directly and in the docker container
