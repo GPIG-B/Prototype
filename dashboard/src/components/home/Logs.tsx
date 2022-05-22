@@ -85,7 +85,7 @@ const styles = {
 		'text-[0.875rem] text-blue-gray-600 px-[0.625rem] py-[0.25rem] border-blue-gray-600 border-[0.0625rem] rounded-[0.25rem] hover:text-white hover:bg-blue-gray-600 duration-100',
 	container: 'divide-y divide-solid divide-blue-gray-400/50 overflow-y-auto',
 	log: 'py-[1rem] flex flex-row gap-[0.625rem]',
-	icon: 'w-[1.25rem] h-[1.25rem]',
+	icon: 'w-[1rem] h-[1rem] mt-[1px]',
 	content: 'flex flex-col gap-[0.375rem]',
 	message: 'text-blue-gray-600 text-[1.125rem] leading-none',
 	date: 'text-blue-gray-400 text-[0.875rem]',

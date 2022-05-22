@@ -1,6 +1,6 @@
 import { useTable, Column as TableColumn } from 'react-table'
 
-export type Data<D = Record<string, unknown>> = D[]
+export type Data<D = Record<string, any>> = D[]
 export type Column = TableColumn<Data[0]>
 
 interface TableProps {

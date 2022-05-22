@@ -1,3 +1,5 @@
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 import {
 	Chart as ChartJS,
 	CategoryScale,
@@ -18,20 +20,24 @@ import {
 	minWarningTurbineFrequency,
 	minWarningTurbineTemperature,
 } from '@/config/index.config'
+import { Turbine as TurbineData } from '@/types'
+import { useSwr } from '@/utils/fetch.util'
 import Dropdown from '@/components/Dropdown'
-
-interface TurbineProps {
-	name: string
-}
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 const styles: Record<string, string> = {
-	header: 'flex flex-row items-center justify-between mb-[3.25rem]',
-	innerHeader: 'flex flex-row items-center gap-[1.25rem]',
+	wrapperCenter:
+		'wrapper h-full flex flex-col justify-center items-center gap-[0.75rem] text-center',
+	error: 'text-[1.25rem]',
+	errorButton:
+		'text-[0.875rem] text-blue-gray-600 px-[0.625rem] py-[0.25rem] border-blue-gray-600 border-[0.0625rem] rounded-[0.25rem] hover:text-white hover:bg-blue-gray-600 duration-100',
+	spinner: 'w-[3rem] h-[3rem]',
+	header: 'flex flex-row items-center justify-between mb-[3.25rem] lg:flex-col lg:items-start lg:gap-[1rem]',
+	innerHeader: 'flex flex-row items-center gap-[1.25rem] xl:gap-[0.75rem] lg:flex-wrap',
 	title: 'm-0',
 	status: 'text-white text-[1rem] rounded-[0.25rem] h-[1.875rem] px-[0.5rem] flex items-center',
 	button: 'text-[0.875rem] text-blue-gray-600 px-[0.625rem] py-[0.25rem] border-blue-gray-600 border-[0.0625rem] rounded-[0.25rem] hover:text-white hover:bg-blue-gray-600 duration-100 whitespace-nowrap',
-	container:
-		'w-full min-w-[37.5rem] grid grid-cols-[2fr_1fr] grid-rows-[repeat(2,_minmax(12.5rem,_1fr))] gap-[2.25rem]',
+	container: 'w-full min-w-[17.5rem] grid turbine-layout gap-[2.25rem]',
 	graph: 'bg-blue-100 text-blue-gray-600 rounded-[0.75rem] px-[1.25rem] pt-[1.75rem] pb-[0.5rem]',
 	graphTitle: 'text-[1.125rem] mb-[0.5rem] ml-[2rem]',
 	doughnutContainer: 'w-full flex-1 flex flex-col justify-center relative',
@@ -267,22 +273,6 @@ const power = [
 	},
 ]
 
-const frequencyData = {
-	label: 'Frequency (Hz)',
-	value: 59.66,
-	maxValue: maxTurbineFrequency,
-	minDangerValue: minDangerTurbineFrequency,
-	minWarningValue: minWarningTurbineFrequency,
-}
-
-const temperatureData = {
-	label: 'Temperature (°C)',
-	value: 104,
-	maxValue: maxTurbineTemperature,
-	minDangerValue: minDangerTurbineTemperature,
-	minWarningValue: minWarningTurbineTemperature,
-}
-
 interface GetDoughnutData {
 	label: string
 	value: number
@@ -333,16 +323,60 @@ const getDoughnutData = ({
 	}
 }
 
-export default function Turbine({ name }: TurbineProps) {
+export default function Turbine() {
+	const { query: { id } } = useRouter()
+
+	const { data, error } = useSwr<TurbineData>('/wind-turbines/' + id, {
+		refreshInterval: 10_000,
+	})
+
+	if (error)
+		return (
+			<div className={styles.wrapperCenter}>
+				<p className={styles.error}>Wind turbine not found</p>
+				<Link href="/turbines">
+					<a className={styles.errorButton} target="_self">
+						Go back
+					</a>
+				</Link>
+			</div>
+		)
+
+	if (!data)
+		return (
+			<div className={styles.wrapperCenter}>
+				<LoadingSpinner className={styles.spinner} />
+			</div>
+		)
+
+	const freq = parseFloat(data.tower_vib_freq.toFixed(2))
+	const temp = parseFloat(data.generator_temp.toFixed(2))
+
+	const frequencyData = {
+		label: 'Frequency (Hz)',
+		value: freq,
+		maxValue: maxTurbineFrequency,
+		minDangerValue: minDangerTurbineFrequency,
+		minWarningValue: minWarningTurbineFrequency,
+	}
+
+	const temperatureData = {
+		label: 'Temperature (°C)',
+		value: temp,
+		maxValue: maxTurbineTemperature,
+		minDangerValue: minDangerTurbineTemperature,
+		minWarningValue: minWarningTurbineTemperature,
+	}
+
 	const onRequestInspectionClick = (value: string) => {
-		alert(`Button clicked: ${value}`)
+		alert('Button clicked: ' + value)
 	}
 
 	return (
 		<div className="wrapper">
 			<div className={styles.header}>
 				<div className={styles.innerHeader}>
-					<h1 className={styles.title}>{name}</h1>
+					<h1 className={styles.title}>{id}</h1>
 
 					<p
 						className={`${styles.status} ${statusThemes['running'].background}`}
@@ -352,6 +386,12 @@ export default function Turbine({ name }: TurbineProps) {
 				</div>
 
 				<div className={styles.innerHeader}>
+					<Link href={`/map?device=${id}`}>
+						<a className={styles.button} target="_self">
+							View in map
+						</a>
+					</Link>
+
 					<Dropdown
 						label="Request inspection"
 						values={[
@@ -367,7 +407,7 @@ export default function Turbine({ name }: TurbineProps) {
 			</div>
 
 			<div className={styles.container}>
-				<div className={styles.graph}>
+				<div className={`${styles.graph} turbine-rps`}>
 					<h3 className={styles.graphTitle}>Rotations per minute</h3>
 
 					<Line
@@ -377,7 +417,7 @@ export default function Turbine({ name }: TurbineProps) {
 					/>
 				</div>
 
-				<div className={styles.doughnut}>
+				<div className={`${styles.doughnut} turbine-freq`}>
 					<h3 className={styles.doughnutTitle}>Frequency (Hz)</h3>
 
 					<div className={styles.doughnutContainer}>
@@ -396,7 +436,7 @@ export default function Turbine({ name }: TurbineProps) {
 					</div>
 				</div>
 
-				<div className={styles.graph}>
+				<div className={`${styles.graph} turbine-power`}>
 					<h3 className={styles.graphTitle}>Power produced (kW/h)</h3>
 
 					<Line
@@ -406,7 +446,7 @@ export default function Turbine({ name }: TurbineProps) {
 					/>
 				</div>
 
-				<div className={styles.doughnut}>
+				<div className={`${styles.doughnut} turbine-temp`}>
 					<h3 className={styles.doughnutTitle}>Temperature (°C)</h3>
 
 					<div className={styles.doughnutContainer}>
@@ -427,12 +467,4 @@ export default function Turbine({ name }: TurbineProps) {
 			</div>
 		</div>
 	)
-}
-
-export async function getServerSideProps({
-	params: { name },
-}: {
-	params: { name: string }
-}) {
-	return { props: { name } }
 }

@@ -4,6 +4,7 @@ import { LogStatus, logStatuses } from '@/config/index.config'
 import { capitalise } from '@/utils/index.utils'
 import Dropdown from '@/components/Dropdown'
 import Table, { Column } from '@/components/Table'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import FailureIcon from '@/public/failure-icon.svg'
 import WarningIcon from '@/public/warning-icon.svg'
 import InfoIcon from '@/public/info-icon.svg'
@@ -11,9 +12,12 @@ import InfoIcon from '@/public/info-icon.svg'
 const statusFilters = ['all', ...logStatuses]
 
 const styles = {
+	wrapper: 'wrapper min-h-full flex flex-col',
 	header: 'flex flex-row items-center gap-[0.625rem] text-[1.125rem] text-blue-gray-400 whitespace-nowrap',
 	type: 'h-[1.75rem] flex flex-row items-center gap-[0.625rem]',
-	icon: 'w-[1.25rem] h-[1.25rem]',
+	fullContent: 'flex-1 flex justify-center items-center',
+	spinner: 'w-[3rem] h-[3rem]',
+	icon: 'w-[1rem] h-[1rem]',
 	message: 'flex items-center',
 	date: 'whitespace-nowrap',
 }
@@ -123,7 +127,7 @@ const dateToString = (date: Date): string | undefined => {
 data.map((datum) => {
 	datum.type = (
 		<div className={styles.type}>
-			{iconFromType[datum.type as string]}
+			<div className={styles.icon}>{iconFromType[datum.type as string]}</div>
 			<p>{capitalise(datum.type as string)}</p>
 		</div>
 	)
@@ -157,7 +161,7 @@ export default function Logs() {
 	)
 
 	return (
-		<div className="wrapper">
+		<div className={styles.wrapper}>
 			<h1>Logs</h1>
 
 			<div className={styles.header}>
@@ -171,7 +175,15 @@ export default function Logs() {
 				/>
 			</div>
 
-			<Table columns={columns} data={memoedData} />
+			{false ? (
+				<div className={styles.fullContent}>
+					<LoadingSpinner className={styles.spinner} />
+				</div>
+			) : false ? (
+				<p className="text-[1.125rem] mt-[2.5rem]">No logs found</p>
+			) : (
+				<Table columns={columns} data={memoedData} />
+			)}
 		</div>
 	)
 }
