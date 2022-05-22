@@ -1,4 +1,5 @@
 from multiprocessing.managers import Namespace
+from typing import Tuple
 import flask
 from copy import copy
 from typing import cast
@@ -18,13 +19,13 @@ def wind_turbines_list() -> flask.Response:
 
 
 @datagen_bp.route('/wind-turbines/<wt_id>', methods=['GET'])
-def wind_turbines_detail(wt_id: str) -> flask.Response:
+def wind_turbines_detail(wt_id: str) -> Tuple[flask.Response, int]:
     readings = get_ns().readings_queue[-1]['wts']
     filtered = [wt for wt in readings if wt['wt_id'] == wt_id]
     if not filtered:
-        return flask.jsonify({'msg': 'Not found'}, 404)
+        return flask.jsonify({'msg': 'Not found'}), 404
     assert len(filtered) == 1
-    return flask.jsonify(filtered[0])
+    return flask.jsonify(filtered[0]), 200
 
 
 @datagen_bp.route('/env-sensors', methods=['GET'])

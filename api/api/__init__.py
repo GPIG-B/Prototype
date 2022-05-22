@@ -3,7 +3,7 @@ import os
 import logging
 from multiprocessing.managers import Namespace
 from typing import cast, Optional, Callable, TypeVar
-from flask_cors import CORS
+from flask_cors import CORS  # type: ignore
 
 import manager
 import datagen
@@ -11,6 +11,9 @@ import datagen
 
 api_bp = flask.Blueprint('api', __name__)
 logger = logging.getLogger('api')
+
+
+ORIGINS = ['http://localhost:80*', '*', '34.142.109.41:80*']
 
 
 @api_bp.route('/', methods=['GET'])
@@ -37,7 +40,7 @@ def dev_app(manager_client: Optional[manager.Client]) -> flask.Flask:
     logger.info('Using passed manager client')
     # instantiate the flask app
     app = flask.Flask('GPIG-api')
-    CORS(app, resources={r"/*": {"origins": "*"}})
+    CORS(app, resources={r"/*": {"origins": ORIGINS}})
     app.register_blueprint(api_bp)
     app.register_blueprint(datagen.api.datagen_bp)
     app.config['MANAGER_CLIENT'] = manager_client
@@ -59,7 +62,7 @@ def deployment_app() -> flask.Flask:
     logger.info('Success')
     # Initialise the app
     app = flask.Flask('GPIG-api')
-    CORS(app, resources={r"/*": {"origins": "*"}})
+    CORS(app, resources={r"/*": {"origins": ORIGINS}})
     app.register_blueprint(api_bp)
     app.register_blueprint(datagen.api.datagen_bp)
     app.config['MANAGER_CLIENT'] = manager_client
