@@ -1,9 +1,10 @@
 from multiprocessing.managers import Namespace
 from typing import Tuple
 import flask
-from flask import session
 from copy import copy
 from typing import cast
+
+from .utils import is_idle_device, set_idle_device
 
 
 datagen_bp = flask.Blueprint('datagen', __name__)
@@ -15,14 +16,13 @@ def readings() -> flask.Response:
 
 
 def add_status(turbine):
-    if turbine["wt_id"] in session.get("IDLE_TURBINES", []):
+    if is_idle_device(turbine["wt_id"]):
         status = "idle"
     elif len(turbine["_faults"]) > 0:
         status = "failure"
     else:
         status = "running"
     turbine["status"] = status
-    turbine["idles"] = session.get("IDLE_TURBINES")
 
 
 @datagen_bp.route('/wind-turbines', methods=['GET'])
@@ -53,9 +53,7 @@ def wind_turbines_disable(wt_id: str) -> Tuple[flask.Response, int]:
         return flask.jsonify({'msg': 'Not found'}), 404
     assert len(filtered) == 1
 
-    IDLE_TURBINES = set(session.get("IDLE_TURBINES", []))
-    IDLE_TURBINES.add(wt_id)
-    session["IDLE_TURBINES"] = list(IDLE_TURBINES)
+    set_idle_device(wt_id)
 
     turbine = filtered[0]
     add_status(turbine)

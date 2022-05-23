@@ -2,6 +2,7 @@ mypy
 flake8
 flask
 flask-cors
+sqlitedict
 pyyaml
 types-PyYAML
 watchdog

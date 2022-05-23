@@ -4,9 +4,21 @@ import math
 from itertools import tee, islice
 from dataclasses import dataclass
 from typing import Callable, Iterator, Iterable, TypeVar, Tuple, Optional
+from sqlitedict import SqliteDict # type: ignore
 
 
 T = TypeVar('T')
+
+
+def is_idle_device(device: str) -> bool:
+    with SqliteDict("idle_devices.sqlite", outer_stack=False) as db:
+        return db.get(device, False)
+
+
+def set_idle_device(device: str, value = True):
+    with SqliteDict("idle_devices.sqlite", outer_stack=False) as db:
+        db[device] = value
+        db.commit()
 
 
 @dataclass
