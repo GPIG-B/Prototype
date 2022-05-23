@@ -17,12 +17,13 @@ interface NavItemProps {
 
 const styles = {
 	wrapper:
-		'basis-64 grow-0 shrink-0 pt-16 flex flex-col items-center overflow-hidden border-r-2 border-gray-200',
-	logo: 'w-12 ml-4',
-	navWrapper: 'mt-16 flex flex-col w-56 gap-2',
+		'basis-64 lg:basis-24 grow-0 shrink-0 pt-16 flex flex-col items-center overflow-hidden border-r-2 border-gray-200',
+	logo: 'w-12 min-lg:ml-4',
+	navWrapper: 'mt-16 flex flex-col w-56 gap-2 lg:w-auto',
 	navItem:
-		'px-4 h-12 flex flex-row items-center rounded-lg text-blue-gray-600 fill-blue-gray-600 font-medium hover:bg-blue-100 duration-200',
-	navItemIcon: 'w-5 mr-4 svg-fill-inherit',
+		'px-4 lg:px-[0.875rem] h-12 flex flex-row items-center rounded-lg text-blue-gray-600 fill-blue-gray-600 font-medium hover:bg-blue-100 duration-200',
+	navItemIcon: 'w-5 h-5 mr-4 svg-fill-inherit lg:m-0',
+	navItemText: 'lg:hidden',
 	navItemActive: 'text-blue-600 bg-blue-100 fill-blue-600',
 }
 
@@ -39,7 +40,7 @@ const Sidebar = () => {
 				title={title}
 			>
 				<div className={styles.navItemIcon}>{Icon}</div>
-				{title}
+				<span className={styles.navItemText}>{title}</span>
 			</a>
 		</Link>
 	)
@@ -57,11 +58,7 @@ const Sidebar = () => {
 						icon={<DashboardIcon />}
 						href="/"
 					/>
-					<NavItem
-						title="Logs"
-						icon={<BellIcon />}
-						href="/logs"
-					/>
+					<NavItem title="Logs" icon={<BellIcon />} href="/logs" />
 					<NavItem
 						title="Turbines"
 						icon={<TurbineIcon />}

@@ -28,11 +28,11 @@ export type LogStatus = 'failure' | 'warning' | 'info'
 
 export const logStatuses = ['failure', 'warning', 'info']
 
-export const maxTurbineFrequency = 200
+export const maxTurbineFrequency = 8000
 
-export const minDangerTurbineFrequency = 120
+export const minDangerTurbineFrequency = 6000
 
-export const minWarningTurbineFrequency = 80
+export const minWarningTurbineFrequency = 4400
 
 export const maxTurbineTemperature = 120
 

@@ -1,23 +1,29 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 
+import { Turbine as TurbineData } from '@/types'
 import {
 	DeviceStatus,
 	deviceStatuses,
 	statusThemes,
 } from '@/config/index.config'
 import { capitalise } from '@/utils/index.utils'
+import { useSwr } from '@/utils/fetch.util'
 import SearchBox from '@/components/SearchBox'
 import Dropdown from '@/components/Dropdown'
 import Table, { Column, Data as TableData } from '@/components/Table'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import ArrowRight from '@/public/arrow-right.svg'
 
 const statusFilters = ['all', ...deviceStatuses]
 
 const styles = {
+	wrapper: 'wrapper min-h-full flex flex-col',
 	header: 'flex flex-row items-center gap-[4rem]',
 	statusFilter:
 		'flex flex-row items-center gap-[0.625rem] text-[1.125rem] text-blue-gray-400 whitespace-nowrap',
+	fullContent: 'flex-1 flex justify-center items-center',
+	spinner: 'w-[3rem] h-[3rem]',
 	table: 'max-w-[62.5rem] mt-[2.25rem]',
 	status: 'text-white h-[1.75rem] px-[0.375rem] inline-flex items-center rounded-[0.25rem]',
 	action: 'inline-flex flex-row items-center gap-[0.375rem] text-blue-600 fill-blue-600 svg-fill-inherit group',
@@ -26,8 +32,8 @@ const styles = {
 
 const columns: Column[] = [
 	{
-		Header: 'Name',
-		accessor: 'name',
+		Header: 'Id',
+		accessor: 'id',
 	},
 	{
 		Header: 'Status',
@@ -39,120 +45,47 @@ const columns: Column[] = [
 	},
 ]
 
-type Datum = {
-	name: string
+interface Datum {
+	id: string
 	status: DeviceStatus | React.ReactElement<any, any>
-	actions?: React.ReactElement<any, any>
+	actions: React.ReactElement<any, any>
 }
 
 type Data = TableData<Datum>
 
-const data: Data = [
-	{
-		name: 'Turbine_001',
-		status: 'running',
-	},
-	{
-		name: 'Turbine_002',
-		status: 'running',
-	},
-	{
-		name: 'Turbine_003',
-		status: 'running',
-	},
-	{
-		name: 'Turbine_004',
-		status: 'running',
-	},
-	{
-		name: 'Turbine_005',
-		status: 'running',
-	},
-	{
-		name: 'Turbine_006',
-		status: 'running',
-	},
-	{
-		name: 'Turbine_007',
-		status: 'failure',
-	},
-	{
-		name: 'Turbine_008',
-		status: 'running',
-	},
-	{
-		name: 'Turbine_009',
-		status: 'running',
-	},
-	{
-		name: 'Turbine_010',
-		status: 'running',
-	},
-	{
-		name: 'Turbine_011',
-		status: 'running',
-	},
-	{
-		name: 'Turbine_012',
-		status: 'warning',
-	},
-	{
-		name: 'Turbine_013',
-		status: 'running',
-	},
-	{
-		name: 'Turbine_014',
-		status: 'warning',
-	},
-	{
-		name: 'Turbine_015',
-		status: 'running',
-	},
-	{
-		name: 'Turbine_016',
-		status: 'running',
-	},
-	{
-		name: 'Turbine_017',
-		status: 'running',
-	},
-	{
-		name: 'Turbine_018',
-		status: 'running',
-	},
-	{
-		name: 'Turbine_019',
-		status: 'running',
-	},
-	{
-		name: 'Turbine_020',
-		status: 'running',
-	},
-]
-
-data.map((datum) => {
-	const theme = statusThemes[datum.status as DeviceStatus]
-	datum.status = (
-		<p className={`${styles.status} ${theme.background}`}>
-			{capitalise(datum.status as string)}
-		</p>
-	)
-
-	datum.actions = (
-		<Link href={`/turbines/${datum.name.toLowerCase()}`}>
-			<a target="_self" className={styles.action}>
-				<span>Details</span>
-				<div className={styles.actionIcon}>
-					<ArrowRight />
-				</div>
-			</a>
-		</Link>
-	)
-})
-
 export default function Turbines() {
+	const [turbines, setTurbines] = useState<Data | null>()
 	const [searchValue, setSearchValue] = useState('')
 	const [statusFilterValue, setStatusFilterValue] = useState(statusFilters[0])
+
+	const { data } = useSwr<TurbineData[]>('/wind-turbines')
+
+	useEffect(() => {
+		if (!data) return
+
+		const turbines: Data = data.map((turbine) => {
+			const theme =
+				statusThemes['running' /* turbine.status */ as DeviceStatus]
+			const status = (
+				<p className={`${styles.status} ${theme.background}`}>
+					{capitalise('running' /* turbine.status */ as string)}
+				</p>
+			)
+			const actions = (
+				<Link href={`/turbines/${turbine.wt_id}`}>
+					<a target="_self" className={styles.action}>
+						<span>Details</span>
+						<div className={styles.actionIcon}>
+							<ArrowRight />
+						</div>
+					</a>
+				</Link>
+			)
+			return { id: turbine.wt_id, status, actions }
+		})
+
+		setTurbines(turbines)
+	}, [data])
 
 	const onSearchValueChange = (e: React.ChangeEvent<HTMLInputElement>) =>
 		setSearchValue(e.target.value)
@@ -162,11 +95,11 @@ export default function Turbines() {
 
 	const memoedData = useMemo(
 		() =>
-			data
-				.filter((datum) => {
+			turbines
+				?.filter((turbine) => {
 					if (
 						searchValue &&
-						!datum.name
+						!turbine.id
 							.toLowerCase()
 							.includes(searchValue.toLowerCase())
 					) {
@@ -177,19 +110,19 @@ export default function Turbines() {
 						statusFilterValue &&
 						statusFilterValue !== 'all' &&
 						(
-							datum.status as React.ReactElement<any, any>
+							turbine.status as React.ReactElement<any, any>
 						).props.children.toLowerCase() !== statusFilterValue
 					)
 						return false
 
 					return true
 				})
-				.sort((a, b) => ('' + a.name).localeCompare(b.name)),
-		[searchValue, statusFilterValue]
+				.sort((a, b) => ('' + a.id).localeCompare(b.id)),
+		[turbines, searchValue, statusFilterValue]
 	)
 
 	return (
-		<div className="wrapper">
+		<div className={styles.wrapper}>
 			<h1>Wind Turbines</h1>
 
 			<div className={styles.header}>
@@ -211,11 +144,21 @@ export default function Turbines() {
 				</div>
 			</div>
 
-			<Table
-				columns={columns}
-				data={memoedData}
-				className={styles.table}
-			/>
+			{!memoedData ? (
+				<div className={styles.fullContent}>
+					<LoadingSpinner className={styles.spinner} />
+				</div>
+			) : memoedData.length === 0 ? (
+				<p className="text-[1.125rem] mt-[2.5rem]">
+					No wind turbines found
+				</p>
+			) : (
+				<Table
+					columns={columns}
+					data={memoedData}
+					className={styles.table}
+				/>
+			)}
 		</div>
 	)
 }

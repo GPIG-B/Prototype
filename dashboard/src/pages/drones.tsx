@@ -1,23 +1,29 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 
+import { Map as MapData } from '@/types'
 import {
 	DeviceStatus,
 	deviceStatuses,
 	statusThemes,
 } from '@/config/index.config'
 import { capitalise } from '@/utils/index.utils'
+import { useSwr } from '@/utils/fetch.util'
 import SearchBox from '@/components/SearchBox'
 import Dropdown from '@/components/Dropdown'
 import Table, { Column, Data as TableData } from '@/components/Table'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import ArrowRight from '@/public/arrow-right.svg'
 
 const statusFilters = ['all', ...deviceStatuses]
 
 const styles = {
+	wrapper: 'wrapper min-h-full flex flex-col',
 	header: 'flex flex-row items-center gap-[4rem]',
 	statusFilter:
 		'flex flex-row items-center gap-[0.625rem] text-[1.125rem] text-blue-gray-400 whitespace-nowrap',
+	fullContent: 'flex-1 flex justify-center items-center',
+	spinner: 'w-[3rem] h-[3rem]',
 	table: 'max-w-[62.5rem] mt-[2.25rem]',
 	status: 'text-white h-[1.75rem] px-[0.375rem] inline-flex items-center rounded-[0.25rem]',
 	action: 'inline-flex flex-row items-center gap-[0.375rem] text-blue-600 fill-blue-600 svg-fill-inherit group',
@@ -26,8 +32,8 @@ const styles = {
 
 const columns: Column[] = [
 	{
-		Header: 'Name',
-		accessor: 'name',
+		Header: 'Id',
+		accessor: 'id',
 	},
 	{
 		Header: 'Status',
@@ -40,119 +46,47 @@ const columns: Column[] = [
 ]
 
 type Datum = {
-	name: string
+	id: string
 	status: DeviceStatus | React.ReactElement<any, any>
 	actions?: React.ReactElement<any, any>
 }
 
 type Data = TableData<Datum>
 
-const data: Data = [
-	{
-		name: 'Drone_001',
-		status: 'running',
-	},
-	{
-		name: 'Drone_002',
-		status: 'running',
-	},
-	{
-		name: 'Drone_003',
-		status: 'running',
-	},
-	{
-		name: 'Drone_004',
-		status: 'running',
-	},
-	{
-		name: 'Drone_005',
-		status: 'running',
-	},
-	{
-		name: 'Drone_006',
-		status: 'running',
-	},
-	{
-		name: 'Drone_007',
-		status: 'failure',
-	},
-	{
-		name: 'Drone_008',
-		status: 'running',
-	},
-	{
-		name: 'Drone_009',
-		status: 'running',
-	},
-	{
-		name: 'Drone_010',
-		status: 'running',
-	},
-	{
-		name: 'Drone_011',
-		status: 'running',
-	},
-	{
-		name: 'Drone_012',
-		status: 'warning',
-	},
-	{
-		name: 'Drone_013',
-		status: 'running',
-	},
-	{
-		name: 'Drone_014',
-		status: 'warning',
-	},
-	{
-		name: 'Drone_015',
-		status: 'running',
-	},
-	{
-		name: 'Drone_016',
-		status: 'running',
-	},
-	{
-		name: 'Drone_017',
-		status: 'running',
-	},
-	{
-		name: 'Drone_018',
-		status: 'running',
-	},
-	{
-		name: 'Drone_019',
-		status: 'running',
-	},
-	{
-		name: 'Drone_020',
-		status: 'running',
-	},
-]
-
-data.map((datum) => {
-	const theme = statusThemes[datum.status as DeviceStatus]
-	datum.status = (
-		<p className={`${styles.status} ${theme.background}`}>
-			{capitalise(datum.status as string)}
-		</p>
-	)
-
-	datum.actions = (
-		<Link href={`/map?device=${datum.name.toLowerCase()}`}>
-			<a target="_self" className={styles.action}>
-				<span>View in map</span>
-				<div className={styles.actionIcon}>
-					<ArrowRight />
-				</div>
-			</a>
-		</Link>
-	)
-})
-
 export default function Drones() {
+	const [drones, setDrones] = useState<Data | null>()
 	const [searchValue, setSearchValue] = useState('')
 	const [statusFilterValue, setStatusFilterValue] = useState(statusFilters[0])
+
+	const { data } = useSwr<MapData>('/map')
+
+	useEffect(() => {
+		if (!data) return
+
+		const drones: Data = data.drones.map((drone) => {
+			const theme =
+				statusThemes['running' /* drone.status */ as DeviceStatus]
+			const status = (
+				<p className={`${styles.status} ${theme.background}`}>
+					{capitalise('running' /* drone.status */ as string)}
+				</p>
+			)
+
+			const actions = (
+				<Link href={`/map?device=${drone.id}`}>
+					<a target="_self" className={styles.action}>
+						<span>View in map</span>
+						<div className={styles.actionIcon}>
+							<ArrowRight />
+						</div>
+					</a>
+				</Link>
+			)
+			return { id: drone.id, status, actions }
+		})
+
+		setDrones(drones)
+	}, [data])
 
 	const onSearchValueChange = (e: React.ChangeEvent<HTMLInputElement>) =>
 		setSearchValue(e.target.value)
@@ -162,11 +96,11 @@ export default function Drones() {
 
 	const memoedData = useMemo(
 		() =>
-			data
-				.filter((datum) => {
+			drones
+				?.filter((drone) => {
 					if (
 						searchValue &&
-						!datum.name
+						!drone.id
 							.toLowerCase()
 							.includes(searchValue.toLowerCase())
 					) {
@@ -177,19 +111,19 @@ export default function Drones() {
 						statusFilterValue &&
 						statusFilterValue !== 'all' &&
 						(
-							datum.status as React.ReactElement<any, any>
+							drone.status as React.ReactElement<any, any>
 						).props.children.toLowerCase() !== statusFilterValue
 					)
 						return false
 
 					return true
 				})
-				.sort((a, b) => ('' + a.name).localeCompare(b.name)),
-		[searchValue, statusFilterValue]
+				.sort((a, b) => ('' + a.id).localeCompare(b.id)),
+		[drones, searchValue, statusFilterValue]
 	)
 
 	return (
-		<div className="wrapper">
+		<div className={styles.wrapper}>
 			<h1>Drones</h1>
 
 			<div className={styles.header}>
@@ -211,11 +145,19 @@ export default function Drones() {
 				</div>
 			</div>
 
-			<Table
-				columns={columns}
-				data={memoedData}
-				className={styles.table}
-			/>
+			{!memoedData ? (
+				<div className={styles.fullContent}>
+					<LoadingSpinner className={styles.spinner} />
+				</div>
+			) : memoedData.length === 0 ? (
+				<p className="text-[1.125rem] mt-[2.5rem]">No drones found</p>
+			) : (
+				<Table
+					columns={columns}
+					data={memoedData}
+					className={styles.table}
+				/>
+			)}
 		</div>
 	)
 }
