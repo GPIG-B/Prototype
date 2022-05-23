@@ -1,2 +1,5 @@
 mypy
 flake8
+
+pygame
+numpy

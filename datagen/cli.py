@@ -4,7 +4,6 @@ import random
 import logging
 import yaml
 import logging.config
-import multiprocessing as mp
 
 import datagen as dg
 import manager

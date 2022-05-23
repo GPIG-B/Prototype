@@ -1,4 +1,4 @@
-_ticks_per_second: 1.  # Only for the simulation loop
+_ticks_per_second: 10.  # Only for the simulation loop
 wts: 10  # Number of wind turbines
 tick_freq: 60 * 60  # seconds
 # Wind
@@ -6,6 +6,12 @@ wind_mag_mean: 9.5  # metres / second
 wind_mag_var: 7.0  # metres / second
 wind_angle_jitter: 0.5  # 0 <= x <= 1
 wind_mag_jitter: 0.5  # 0 <= x <= 1
+# Waves
+wind_to_wave_scalar: 0.7
+wave_mag_var: 0.3
+# Visibility
+vis_mean: 1300.
+vis_var: 400.
 # Temp
 temp_mean: 8.1  # degree Celsius
 temp_jitter: 0.5  # 0 <= x <= 1
@@ -13,7 +19,7 @@ temp_annual_spread: 10.0  # degree Celsius
 temp_daily_spread: 7.0  # degree Celsius0
 temp_daily_std: 2.0  # degree Celsius.
 temp_annual_std: 2.0  # degree Celsius.
-# Factor to convert between wind metres/sec and rotor rotations/sec
+# (outdated) Factor to convert between wind metres/sec and rotor rotations/sec
 rotor_rps_alpha: 0.9998  # 0 <= x <= 1
 rotor_rps_relative_var: 0.05
 tower_vib_freq_mean: 4300.0  # Hz
