@@ -4,7 +4,7 @@ import flask
 from copy import copy
 from typing import cast
 
-from .utils import is_idle_device, set_idle_device
+from .utils import is_idle_device, set_idle_device, list_idle_devices
 
 
 datagen_bp = flask.Blueprint('datagen', __name__)
@@ -16,7 +16,8 @@ def readings() -> flask.Response:
 
 
 def add_status(turbine):
-    if is_idle_device(turbine["wt_id"]):
+    IDLE_DEVICES = list_idle_devices()
+    if turbine["wt_id"] in IDLE_DEVICES:
         status = "idle"
     elif len(turbine["_faults"]) > 0:
         status = "failure"

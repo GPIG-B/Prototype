@@ -21,6 +21,14 @@ def set_idle_device(device: str, value = True):
         db.commit()
 
 
+def list_idle_devices():
+    devices = []
+    with SqliteDict("idle_devices.sqlite", outer_stack=False) as db:
+        for device, val in db.items():
+            if val == True: devices.append(device)
+    return devices
+
+
 @dataclass
 class Vec2:
     angle: float
