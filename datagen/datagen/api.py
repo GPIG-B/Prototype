@@ -52,12 +52,19 @@ def wind_turbines_disable(wt_id: str) -> Tuple[flask.Response, int]:
     if not filtered:
         return flask.jsonify({'msg': 'Not found'}), 404
     assert len(filtered) == 1
+    set_idle_device(wt_id, True)
+    return flask.jsonify({'msg': 'Success'}), 200
 
-    set_idle_device(wt_id)
 
-    turbine = filtered[0]
-    add_status(turbine)
-    return flask.jsonify(turbine), 200
+@datagen_bp.route('/wind-turbines/<wt_id>/enable', methods=['POST'])
+def wind_turbines_disable(wt_id: str) -> Tuple[flask.Response, int]:
+    readings = get_ns().readings_queue[-1]['wts']
+    filtered = [wt for wt in readings if wt['wt_id'] == wt_id]
+    if not filtered:
+        return flask.jsonify({'msg': 'Not found'}), 404
+    assert len(filtered) == 1
+    set_idle_device(wt_id, False)
+    return flask.jsonify({'msg': 'Success'}), 200
 
 
 @datagen_bp.route('/env-sensors', methods=['GET'])
