@@ -15,9 +15,8 @@ def readings() -> flask.Response:
     return flask.jsonify(get_ns().readings_queue)
 
 
-def add_status(turbine):
-    IDLE_DEVICES = list_idle_devices()
-    if turbine["wt_id"] in IDLE_DEVICES:
+def add_status(turbine, is_idle):
+    if is_idle:
         status = "idle"
     elif len(turbine["_faults"]) > 0:
         status = "failure"
@@ -29,8 +28,9 @@ def add_status(turbine):
 @datagen_bp.route('/wind-turbines', methods=['GET'])
 def wind_turbines_list() -> flask.Response:
     readings = get_ns().readings_queue[-1]['wts']
+    IDLE_DEVICES = set(list_idle_devices())
     for turbine in readings:
-        add_status(turbine)
+        add_status(turbine, turbine["wt_id"] in IDLE_DEVICES)
     return flask.jsonify(readings)
 
 
@@ -42,7 +42,7 @@ def wind_turbines_detail(wt_id: str) -> Tuple[flask.Response, int]:
         return flask.jsonify({'msg': 'Not found'}), 404
     assert len(filtered) == 1
     turbine = filtered[0]
-    add_status(turbine)
+    add_status(turbine, is_idle_device(turbine["wt_id"]))
     return flask.jsonify(turbine), 200
 
 

@@ -10,6 +10,10 @@ from sqlitedict import SqliteDict # type: ignore
 T = TypeVar('T')
 
 
+with SqliteDict("idle_devices.sqlite", outer_stack=False):
+    pass
+
+
 def is_idle_device(device: str) -> bool:
     with SqliteDict("idle_devices.sqlite", outer_stack=False) as db:
         return db.get(device, False)
