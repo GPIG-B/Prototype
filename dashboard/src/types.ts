@@ -1,5 +1,8 @@
+export type DeviceStatus = 'running' | 'warning' | 'failure' | 'idle'
+
 export interface Turbine {
 	wt_id: string
+	status: DeviceStatus
 	generator_temp: number
 	rotor_rps: number
 	tower_vib_freq: number

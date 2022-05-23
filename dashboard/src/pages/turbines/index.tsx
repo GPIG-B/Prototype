@@ -1,12 +1,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 
-import { Turbine as TurbineData } from '@/types'
-import {
-	DeviceStatus,
-	deviceStatuses,
-	statusThemes,
-} from '@/config/index.config'
+import { DeviceStatus, Turbine as TurbineData } from '@/types'
+import { deviceStatuses, statusThemes } from '@/config/index.config'
 import { capitalise } from '@/utils/index.utils'
 import { useSwr } from '@/utils/fetch.util'
 import SearchBox from '@/components/SearchBox'
@@ -64,11 +60,10 @@ export default function Turbines() {
 		if (!data) return
 
 		const turbines: Data = data.map((turbine) => {
-			const theme =
-				statusThemes['running' /* turbine.status */ as DeviceStatus]
+			const theme = statusThemes[turbine.status]
 			const status = (
 				<p className={`${styles.status} ${theme.background}`}>
-					{capitalise('running' /* turbine.status */ as string)}
+					{capitalise(turbine.status)}
 				</p>
 			)
 			const actions = (
@@ -91,7 +86,7 @@ export default function Turbines() {
 		setSearchValue(e.target.value)
 
 	const onStatusFilterValueChange = (value: string) =>
-		setStatusFilterValue(value)
+		setStatusFilterValue(value?.toLowerCase())
 
 	const memoedData = useMemo(
 		() =>
