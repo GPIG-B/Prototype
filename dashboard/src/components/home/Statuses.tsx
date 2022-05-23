@@ -1,6 +1,9 @@
+import { DeviceStatus } from '@/types'
+
 type StatusTheme = 'blue' | 'yellow' | 'red' | 'gray'
 
 interface StatusesProps {
+	wtStatuses: Record<DeviceStatus, number>
 	titleClassName: string
 }
 
@@ -50,7 +53,10 @@ const Status = ({ name, amount, theme }: StatusProps) => (
 	</div>
 )
 
-export default function Statuses({ titleClassName }: StatusesProps) {
+export default function Statuses({
+	wtStatuses,
+	titleClassName,
+}: StatusesProps) {
 	return (
 		<div className={styles.container}>
 			<div>
@@ -59,10 +65,22 @@ export default function Statuses({ titleClassName }: StatusesProps) {
 				</h2>
 
 				<div className={styles.statusContainer}>
-					<Status name="running" amount={286} theme="blue" />
-					<Status name="warnings" amount={4} theme="yellow" />
-					<Status name="failures" amount={1} theme="red" />
-					<Status name="idle" amount={3} theme="gray" />
+					<Status
+						name="running"
+						amount={wtStatuses.running}
+						theme="blue"
+					/>
+					<Status
+						name="warnings"
+						amount={wtStatuses.warning}
+						theme="yellow"
+					/>
+					<Status
+						name="failures"
+						amount={wtStatuses.failure}
+						theme="red"
+					/>
+					<Status name="idle" amount={wtStatuses.idle} theme="gray" />
 				</div>
 			</div>
 
