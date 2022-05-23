@@ -105,7 +105,8 @@ class Environment:
     def get_readings(self) -> Dict[str, ReadingT]:
         return dict(env_wind_angle=self.wind.angle,
                     env_wind_mag=self.wind.mag,
-                    env_temp=self.temp, wave_mag=self.wave_mag)
+                    env_temp=self.temp, wave_mag=self.wave_mag,
+                    visibility=self.visibility)
 
 
 class Component(Protocol):
