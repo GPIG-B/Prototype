@@ -4,9 +4,33 @@ import math
 from itertools import tee, islice
 from dataclasses import dataclass
 from typing import Callable, Iterator, Iterable, TypeVar, Tuple, Optional
+from sqlitedict import SqliteDict # type: ignore
 
 
 T = TypeVar('T')
+
+
+with SqliteDict("idle_devices.sqlite", outer_stack=False):
+    pass
+
+
+def is_idle_device(device: str) -> bool:
+    with SqliteDict("idle_devices.sqlite", outer_stack=False) as db:
+        return db.get(device, False)
+
+
+def set_idle_device(device: str, value = True):
+    with SqliteDict("idle_devices.sqlite", outer_stack=False) as db:
+        db[device] = value
+        db.commit()
+
+
+def list_idle_devices():
+    devices = []
+    with SqliteDict("idle_devices.sqlite", outer_stack=False) as db:
+        for device, val in db.items():
+            if val == True: devices.append(device)
+    return devices
 
 
 @dataclass
