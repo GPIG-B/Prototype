@@ -22,6 +22,7 @@ def add_status(turbine):
     else:
         status = "running"
     turbine["status"] = status
+    turbine["idles"] = session.get("IDLE_TURBINES")
 
 
 @datagen_bp.route('/wind-turbines', methods=['GET'])
