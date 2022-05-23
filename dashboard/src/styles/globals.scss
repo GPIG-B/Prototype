@@ -71,13 +71,13 @@
 	/* Turbine layout */
 	.turbine-layout {
 		grid-template-columns: 2fr 0.8fr;
-		grid-template-rows: repeat(3, minmax(12.5rem, 1fr));
+		grid-template-rows: repeat(2, minmax(12.5rem, 1fr));
 		grid-template-areas:
 			"rps freq"
-			"power temp"
-			". .";
+			"power temp";
 		@screen xl {
 			grid-template-columns: 1fr 1fr !important;
+			grid-template-rows: repeat(3, minmax(12.5rem, 1fr));
 			grid-template-areas:
 				"rps rps"
 				"power power"

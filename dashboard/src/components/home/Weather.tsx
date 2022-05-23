@@ -39,8 +39,12 @@ const Stat = ({ label, value, icon: Icon, iconStyle }: StatProps) => (
 	</div>
 )
 
+const FETCH_INTERVAL = 300_000 // 5 minutes
+
 export default function Weather() {
-	const { data, error } = useSwr<Env>('/env-sensors')
+	const { data, error } = useSwr<Env>('/env-sensors', {
+		refreshInterval: FETCH_INTERVAL,
+	})
 
 	if (error) return null
 
@@ -56,7 +60,9 @@ export default function Weather() {
 
 	const temp = Math.round(data.env_temp) + '°C'
 	const wind = Math.round(data.env_wind_mag) + 'mph'
-	const windAngle = '-45deg' // data.env_wind_angle.toFixed(2) + 'deg'
+	const windAngle = data.env_wind_angle + 'rad' // '-45deg'
+	const wave = Math.round(data.wave_mag) + 'm'
+	const visibility = Math.round(data.visibility) + 'm'
 
 	return (
 		<div className={styles.container}>
@@ -68,8 +74,8 @@ export default function Weather() {
 				icon={WindIcon}
 				iconStyle={{ transform: `rotate(${windAngle})` }}
 			/>
-			<Stat label="Waves" value="0.6m" icon={WavesIcon} />
-			<Stat label="Visibility" value="200m" icon={VisibilityIcon} />
+			<Stat label="Waves" value={wave} icon={WavesIcon} />
+			<Stat label="Visibility" value={visibility} icon={VisibilityIcon} />
 		</div>
 	)
 }

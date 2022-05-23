@@ -33,4 +33,6 @@ export interface Env {
 	env_temp: number
 	env_wind_angle: number
 	env_wind_mag: number
+	wave_mag: number
+	visibility: number
 }

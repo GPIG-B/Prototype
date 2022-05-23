@@ -128,8 +128,7 @@ export default function Map({
 		const { drones } = data
 		drones.map(({ id, lat, lng }) => {
 			const marker = markers[id]
-			if (!marker) return console.log('Not found')
-			marker.setPosition({ lat, lng })
+			marker?.setPosition({ lat, lng })
 		})
 	}, [data])
 
