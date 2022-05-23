@@ -4,7 +4,7 @@ from logging import getLogger
 import time
 
 import manager
-from sensor_service import process
+from sensor_service import get_fault_alerts
 
 
 logger = getLogger('sensor_service')
@@ -22,8 +22,9 @@ def main() -> None:
         if not hasattr(ns, 'readings_queue') or not ns.readings_queue:
             time.sleep(0.1)  # lmao
             continue
-        process(ns.readings_queue)
-        time.sleep(1.0)  # lmao
+        alert_wt_ids = get_fault_alerts(ns.readings_queue)
+        logger.info(f'Alerts for: {alert_wt_ids}')
+        time.sleep(1.0)
 
 
 if __name__ == '__main__':

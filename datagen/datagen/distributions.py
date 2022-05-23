@@ -40,3 +40,19 @@ def make_wind_iter(cfg: Config) -> Iterator[Vec2]:
     mag_iter = (max(0, x) for x in mag_autocorr)
     wind_iter = map(Vec2, angle_iter, mag_iter)
     return wind_iter
+
+
+def make_wave_iter(cfg: Config, wind_iter: Iterator[Vec2]) -> Iterator[float]:
+    mags = (max(w.mag, 1.) for w in wind_iter)
+    mags = (mag + random.gauss(0., cfg.wind_mag_var) for mag in mags)
+    mags = (max(0., mag) for mag in mags)
+    return mags
+
+
+def make_vis_iter(cfg: Config) -> Iterator[float]:
+    vis_autocorr = Autocorr(dist=lambda _: random.gauss(cfg.vis_mean,
+                                                        cfg.vis_var),
+                            alpha=0.5, beta=10,
+                            increment=1 / cfg.ticks_per_day)
+    vis_iter = (max(10., x) for x in vis_autocorr)
+    return vis_iter

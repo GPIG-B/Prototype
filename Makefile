@@ -1,6 +1,6 @@
 SHELL=/bin/sh
 MAKE=make
-SUBDIRS=datagen/ manager/ sensor_service/ drone_scheduling/ dashboard/ api/ sidecar/
+SUBDIRS=datagen/ manager/ sensor_service/ dashboard/ api/ sidecar/
 CLI_FILES=$(shell find -name cli.py -not -path "./.*")
 .PHONY: clean all
 

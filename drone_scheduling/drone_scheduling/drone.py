@@ -1,8 +1,7 @@
+from typing import Optional
 from dataclasses import dataclass, field
-import enum
 import numpy as np
-import math
-from utils import norm
+from .utils import norm
 from enum import Enum
 
 # 1 degree of lat = 111.32km
@@ -10,11 +9,11 @@ from enum import Enum
 # 0.45 degree of lat = 50km
 # 0.9 degree of long = 59km
 
-
 # constants
 CHARGE_SPEED = 100 / 3600
 CHARGE_COST = 100 / 1800
 CRITICAL_BATTERY = 25
+
 
 class Status(Enum):
     IDLE = 0
@@ -24,18 +23,19 @@ class Status(Enum):
     WARNING = 4
     CRITICAL = 5
 
+
 @dataclass
 class Drone():
-    id : int
-    status : Status
-    station : int # station platform the drone currently belongs to
-    position : np.array
+    id: int
+    status: Status
+    station: int # station platform the drone currently belongs to
+    position: np.ndarray
     speed = 12
-    velocity : np.array = field(init=False)
-    target : list = None
-    avoidance_path : list = field(init=False)
+    velocity: np.ndarray = field(init=False)
+    target: Optional[np.ndarray] = None
+    avoidance_path: list = field(init=False)
     battery = 100.0
-    
+
     def move(self, delta):
         self.position += (self.velocity * delta)
         self.battery = self.battery - (CHARGE_COST * delta)
@@ -61,6 +61,7 @@ class Drone():
         if self.battery < CRITICAL_BATTERY:
             return True
         return False
+
 
 # Water, Earth, Fire, Air
 class air(Drone):

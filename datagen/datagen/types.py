@@ -5,6 +5,7 @@ import time
 import logging
 from abc import ABC
 from datetime import timedelta
+from itertools import tee
 from pathlib import Path
 import yaml
 from functools import partial
@@ -13,7 +14,8 @@ from typing import (Protocol, List, Dict, Union, Iterator, Any, Callable, Type,
 
 from .config import Config
 from .utils import Vec2, id_factory, smooth_step
-from .distributions import make_temp_iter, make_wind_iter
+from .distributions import (make_temp_iter, make_wind_iter, make_wave_iter,
+                            make_vis_iter)
 
 
 logger = logging.getLogger('datagen')
@@ -56,13 +58,16 @@ class Simulation:
             self.uptime += timedelta(seconds=self.cfg.tick_freq)
         return self
 
-    def loop(self, callback: Callable[[ReadingsT], None]) -> None:
+    def loop(self, callback: Callable[[ReadingsT], None], max_ticks: int = -1,
+             no_wait: bool = False) -> None:
         logger.info('Simulation loop started')
-        while self.running:
+        while self.running and max_ticks != 0:
             readings = self.get_readings()
             callback(readings)
             self.tick()
-            time.sleep(1 / self.cfg._ticks_per_second)
+            if not no_wait:
+                time.sleep(1 / self.cfg._ticks_per_second)
+            max_ticks -= 1
         logger.info('Simulation loop terminated')
 
 
@@ -71,17 +76,25 @@ class Environment:
     cfg: Config = field(repr=False)
     wind: Vec2
     temp: float
+    wave_mag: float
+    visibility: float
     _temp_iter: Iterator[float] = field(repr=False)
     _wind_iter: Iterator[Vec2] = field(repr=False)
+    _wave_iter: Iterator[float] = field(repr=False)
+    _vis_iter: Iterator[float] = field(repr=False)
 
     @classmethod
     def from_config(cls, cfg: Config) -> Environment:
-        wind_iter = make_wind_iter(cfg)
+        wind_iter, wi = tee(make_wind_iter(cfg))
         wind = next(wind_iter)
         temp_iter = make_temp_iter(cfg)
         temp = next(temp_iter)
-        return cls(cfg=cfg, wind=wind, _wind_iter=wind_iter, temp=temp,
-                   _temp_iter=temp_iter)
+        wave_iter = make_wave_iter(cfg, wi)
+        vis_iter = make_vis_iter(cfg)
+        return cls(cfg=cfg, wind=wind, _wind_iter=wind_iter,
+                   _wave_iter=wave_iter, temp=temp, _temp_iter=temp_iter,
+                   wave_mag=next(wave_iter), visibility=next(vis_iter),
+                   _vis_iter=vis_iter)
 
     def tick(self) -> None:
         # Update wind
@@ -92,7 +105,7 @@ class Environment:
     def get_readings(self) -> Dict[str, ReadingT]:
         return dict(env_wind_angle=self.wind.angle,
                     env_wind_mag=self.wind.mag,
-                    env_temp=self.temp)
+                    env_temp=self.temp, wave_mag=self.wave_mag)
 
 
 class Component(Protocol):
@@ -246,7 +259,7 @@ class Rotor(Component):
         self.rps = max(0, rps)
 
 
-@WindTurbine.wt_fault(1e-7)
+@WindTurbine.wt_fault(1e-8)
 @dataclass
 class RotorBladeSurfaceCrack(Fault):
     # Severety of the fault
@@ -284,7 +297,7 @@ class Generator(Component):
                       / (wt.model.rotor_rpm / env.cfg.ticks_per_minute))
 
 
-@WindTurbine.wt_fault(1e-7)
+@WindTurbine.wt_fault(1e-8)
 @dataclass
 class GeneratorDamage(Fault):
     # Severety of the fault
