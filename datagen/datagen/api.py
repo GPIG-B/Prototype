@@ -57,7 +57,7 @@ def wind_turbines_disable(wt_id: str) -> Tuple[flask.Response, int]:
 
 
 @datagen_bp.route('/wind-turbines/<wt_id>/enable', methods=['POST'])
-def wind_turbines_disable(wt_id: str) -> Tuple[flask.Response, int]:
+def wind_turbines_enable(wt_id: str) -> Tuple[flask.Response, int]:
     readings = get_ns().readings_queue[-1]['wts']
     filtered = [wt for wt in readings if wt['wt_id'] == wt_id]
     if not filtered:
