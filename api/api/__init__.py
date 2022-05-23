@@ -46,6 +46,7 @@ def dev_app(manager_client: Optional[manager.Client]) -> flask.Flask:
     app.config['MANAGER_CLIENT'] = manager_client
     app.config['DEBUG'] = True
     app.config['ENV'] = 'development'
+    app.secret_key = 'aoiuwdh3892hd1837hdaiuwsodho2187dh1'
     return app
 
 
@@ -68,4 +69,5 @@ def deployment_app() -> flask.Flask:
     app.config['MANAGER_CLIENT'] = manager_client
     app.config['DEBUG'] = False
     app.config['ENV'] = 'development'
+    app.secret_key = 'aoiuwdh3892hd1837hdaiuwsodho2187dh1'
     return app
