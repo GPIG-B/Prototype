@@ -106,6 +106,7 @@ export default function Map({
 	area,
 	turbines,
 	drones,
+	stations,
 }: MapProps) {
 	const {
 		query: { device },
@@ -160,6 +161,16 @@ export default function Map({
 				title: id,
 				position: { lat, lng },
 				icon: 'drone-marker.png',
+				zIndex: 3,
+			})
+		})
+
+		stations.map(({ id, lat, lng }) => {
+			markers[id] = addMarker({
+				...markerOptions,
+				title: id,
+				position: { lat, lng },
+				icon: 'station-marker.png',
 				zIndex: 2,
 			})
 		})

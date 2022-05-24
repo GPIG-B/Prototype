@@ -22,6 +22,8 @@ export interface Boundaries {
 
 type Drone = { id: string } & Coord
 
+type Station = { id: string } & Coord
+
 export interface Map {
 	area: Coord[]
 	boundaries: Boundaries
@@ -30,6 +32,7 @@ export interface Map {
 	minZoom: number
 	turbines: Array<{ id: string } & Coord>
 	drones: Drone[]
+	stations: Station[]
 }
 
 export interface Env {
