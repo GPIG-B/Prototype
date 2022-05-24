@@ -125,13 +125,10 @@ export default function Map({
 			return
 		data.map(({ drone_id, status, lat, lng }) => {
 			const marker = markers[drone_id]
-			if (marker) {
-				if (status !== 'travelling') marker.setVisible(false)
-				else {
-					marker.setPosition({ lat, lng })
-					marker.setVisible(true)
-				}
-			}
+			if (!marker) return // No marker found
+			const isTravelling = status === 'travelling'
+			if (isTravelling) marker.setPosition({ lat, lng }) // Update position if moving
+			marker.setVisible(isTravelling) // Only visible if moving
 		})
 	}, [data, markers])
 
