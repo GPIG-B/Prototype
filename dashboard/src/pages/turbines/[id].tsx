@@ -109,171 +109,17 @@ const dateToString = (date: Date) => {
 	return `${date.getDate()}/${month}`
 }
 
-const rpm: { value: number; timestamp: Date }[] = [
-	{
-		value: 352,
-		timestamp: new Date(1649515926000),
-	},
-	{
-		value: 360,
-		timestamp: new Date(1649602326000),
-	},
-	{
-		value: 302,
-		timestamp: new Date(1649688726000),
-	},
-	{
-		value: 298,
-		timestamp: new Date(1649775126000),
-	},
-	{
-		value: 285,
-		timestamp: new Date(1649861526000),
-	},
-	{
-		value: 189,
-		timestamp: new Date(1649947926000),
-	},
-	{
-		value: 147,
-		timestamp: new Date(1650034326000),
-	},
-	{
-		value: 235,
-		timestamp: new Date(1650120726000),
-	},
-	{
-		value: 340,
-		timestamp: new Date(1650207126000),
-	},
-	{
-		value: 360,
-		timestamp: new Date(1650293526000),
-	},
-	{
-		value: 325,
-		timestamp: new Date(1650379926000),
-	},
-	{
-		value: 298,
-		timestamp: new Date(1650466326000),
-	},
-	{
-		value: 288,
-		timestamp: new Date(1650552726000),
-	},
-	{
-		value: 301,
-		timestamp: new Date(1650639126000),
-	},
-	{
-		value: 420,
-		timestamp: new Date(1650725526000),
-	},
-	{
-		value: 410,
-		timestamp: new Date(1650811926000),
-	},
-	{
-		value: 380,
-		timestamp: new Date(1650898326000),
-	},
-	{
-		value: 205,
-		timestamp: new Date(1650984726000),
-	},
-	{
-		value: 240,
-		timestamp: new Date(1651071126000),
-	},
-	{
-		value: 410,
-		timestamp: new Date(1651157526000),
-	},
-]
-
-const power = [
-	{
-		value: 352,
-		timestamp: new Date(1649515926000),
-	},
-	{
-		value: 360,
-		timestamp: new Date(1649602326000),
-	},
-	{
-		value: 302,
-		timestamp: new Date(1649688726000),
-	},
-	{
-		value: 298,
-		timestamp: new Date(1649775126000),
-	},
-	{
-		value: 285,
-		timestamp: new Date(1649861526000),
-	},
-	{
-		value: 189,
-		timestamp: new Date(1649947926000),
-	},
-	{
-		value: 147,
-		timestamp: new Date(1650034326000),
-	},
-	{
-		value: 235,
-		timestamp: new Date(1650120726000),
-	},
-	{
-		value: 340,
-		timestamp: new Date(1650207126000),
-	},
-	{
-		value: 360,
-		timestamp: new Date(1650293526000),
-	},
-	{
-		value: 325,
-		timestamp: new Date(1650379926000),
-	},
-	{
-		value: 298,
-		timestamp: new Date(1650466326000),
-	},
-	{
-		value: 288,
-		timestamp: new Date(1650552726000),
-	},
-	{
-		value: 301,
-		timestamp: new Date(1650639126000),
-	},
-	{
-		value: 420,
-		timestamp: new Date(1650725526000),
-	},
-	{
-		value: 410,
-		timestamp: new Date(1650811926000),
-	},
-	{
-		value: 380,
-		timestamp: new Date(1650898326000),
-	},
-	{
-		value: 205,
-		timestamp: new Date(1650984726000),
-	},
-	{
-		value: 240,
-		timestamp: new Date(1651071126000),
-	},
-	{
-		value: 410,
-		timestamp: new Date(1651157526000),
-	},
-]
+const generateHistoricalData = <T = unknown,>(values: T[]) => {
+	if (values.length === 0) return []
+	const now = new Date()
+	const dates: Date[] = []
+	for (let i = values.length - 1; i >= 0; i--) {
+		const date = new Date()
+		date.setDate(now.getDate() - i)
+		dates.push(date)
+	}
+	return dates.map((date, i) => ({ value: values[i], timestamp: date }))
+}
 
 interface GetDoughnutData {
 	label: string
@@ -352,12 +198,9 @@ export default function Turbine({ id }: { id: string }) {
 			</div>
 		)
 
-	const freq = parseFloat(data.tower_vib_freq.toFixed(2))
-	const temp = parseFloat(data.generator_temp.toFixed(2))
-
 	const frequencyData = {
 		label: 'Frequency (Hz)',
-		value: freq,
+		value: parseFloat(data.tower_vib_freq.toFixed(2)),
 		maxValue: maxTurbineFrequency,
 		minDangerValue: minDangerTurbineFrequency,
 		minWarningValue: minWarningTurbineFrequency,
@@ -365,15 +208,16 @@ export default function Turbine({ id }: { id: string }) {
 
 	const temperatureData = {
 		label: 'Temperature (°C)',
-		value: temp,
+		value: parseFloat(data.generator_temp.toFixed(2)),
 		maxValue: maxTurbineTemperature,
 		minDangerValue: minDangerTurbineTemperature,
 		minWarningValue: minWarningTurbineTemperature,
 	}
 
-	const onRequestInspectionClick = (value: string) => {
-		alert('Button clicked: ' + value)
-	}
+	const rpm = generateHistoricalData(data.rotor_rps.map((rps) => rps / 60))
+	const power = generateHistoricalData(
+		data.power.map((power) => power / 1000)
+	)
 
 	const disableSensors = async () => {
 		await fetch(`/wind-turbines/${id}/disable`, {
@@ -387,6 +231,14 @@ export default function Turbine({ id }: { id: string }) {
 			method: 'post',
 		})
 		mutate()
+	}
+
+	const generateFault = () => fetch(`/add-fault/${id}`, { method: 'post' })
+
+	const onRequestInspectionClick = (value: string) => {
+		if (value === 'Request drone inspection') {
+			generateFault()
+		} else alert('Button clicked: ' + value)
 	}
 
 	return (
@@ -405,21 +257,25 @@ export default function Turbine({ id }: { id: string }) {
 				</div>
 
 				<div className={styles.innerHeader}>
+					<button className={styles.button} onClick={generateFault}>
+						Generate fault
+					</button>
+
 					<Link href={`/map?device=${id}`}>
 						<a className={styles.button} target="_self">
 							View in map
 						</a>
 					</Link>
 
-					<Dropdown
+					{/* <Dropdown
 						label="Request inspection"
 						values={[
 							'Request drone inspection',
-							'Request ship inspection',
+							// 'Request ship inspection',
 						]}
 						onClick={onRequestInspectionClick}
 						capitaliseValues
-					/>
+					/> */}
 
 					{data.status === 'idle' ? (
 						<button

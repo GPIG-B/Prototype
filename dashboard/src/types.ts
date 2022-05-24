@@ -6,8 +6,9 @@ export interface Turbine {
 	wt_id: string
 	status: TurbineStatus
 	generator_temp: number
-	rotor_rps: number
 	tower_vib_freq: number
+	rotor_rps: number[]
+	power: number[]
 }
 
 export interface Coord {

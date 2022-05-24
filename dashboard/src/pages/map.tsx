@@ -15,6 +15,7 @@ interface AddMarkerProps {
 	position: Coords
 	icon: string
 	zIndex?: number
+	hidden?: boolean
 }
 
 interface MarkerIcon {
@@ -68,6 +69,7 @@ function addMarker({
 	title,
 	icon: url,
 	zIndex = 1,
+	hidden = false,
 }: AddMarkerProps) {
 	const scaledSize = new maps.Size(iconSize, iconSize)
 	const options = {
@@ -77,6 +79,7 @@ function addMarker({
 		zIndex,
 		optimized: true,
 		icon: { url, scaledSize },
+		visible: !hidden,
 	}
 	return new maps.Marker(options)
 }
@@ -162,13 +165,14 @@ export default function Map({
 			})
 		})
 
-		drones.map(({ drone_id, lat, lng }) => {
+		drones.map(({ drone_id, status, lat, lng }) => {
 			markers[drone_id] = addMarker({
 				...markerOptions,
 				title: drone_id,
 				position: { lat, lng },
 				icon: 'drone-marker.png',
 				zIndex: 3,
+				hidden: status !== 'travelling',
 			})
 		})
 
