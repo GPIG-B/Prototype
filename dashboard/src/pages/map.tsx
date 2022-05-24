@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import GoogleMapReact, { Coords, Size } from 'google-map-react'
 
-import { Map as MapData, Boundaries, Coord } from '@/types'
+import { Drone, Map as MapData, Boundaries, Coord } from '@/types'
 import { iconSize } from '@/config/map.config'
 import { fetch, useSwr } from '@/utils/fetch.util'
 import LoadingSpinner from '@/components/LoadingSpinner'
@@ -126,13 +126,12 @@ export default function Map({
 			</div>
 		)
 
-	const { data } = useSwr<MapData>('/map', { refreshInterval: 5000 })
+	const { data } = useSwr<Drone[]>('/drones', { refreshInterval: 5000 })
 
 	useEffect(() => {
-		if (!data) return
-		const { drones } = data
-		drones.map(({ id, lat, lng }) => {
-			const marker = markers[id]
+		if (!data || data.length === 0) return
+		data.map(({ drone_id, lat, lng }) => {
+			let marker = markers[drone_id]
 			marker?.setPosition({ lat, lng })
 		})
 	}, [data])
