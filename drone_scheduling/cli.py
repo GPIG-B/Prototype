@@ -51,8 +51,8 @@ def main() -> None:
         inspected = scheduler.update(drones)
         ds.update(spos, drones, dt)
         positions = [{'drone_id': f'Drone_{d.id}',
-                      'lat': float(d.abs_pos[0] + ds.LAT_BIAS),
-                      'lng': float(d.abs_pos[1] + ds.LNG_BIAS),
+                      'lat': float(d.abs_pos[0]),
+                      'lng': float(d.abs_pos[1]),
                       'status': d.status.name.lower()}
                       for d in drones]
         client.get_ns().drone_positions = positions
