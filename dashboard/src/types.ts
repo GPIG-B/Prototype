@@ -20,7 +20,7 @@ export interface Boundaries {
 	west: number
 }
 
-type Drone = { id: string } & Coord
+export type Drone = { drone_id: string } & Coord
 
 type Station = { id: string } & Coord
 
@@ -31,7 +31,7 @@ export interface Map {
 	defaultZoom: number
 	minZoom: number
 	turbines: Array<{ id: string } & Coord>
-	drones: Drone[]
+	drones: Array<{ id: string } & Coord>
 	stations: Station[]
 }
 
