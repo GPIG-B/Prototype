@@ -20,7 +20,10 @@ export interface Boundaries {
 	west: number
 }
 
-export type Drone = { drone_id: string } & Coord
+export type Drone = {
+	drone_id: string
+	status: DeviceStatus
+} & Coord
 
 type Station = { id: string } & Coord
 
