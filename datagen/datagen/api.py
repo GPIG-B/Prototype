@@ -33,6 +33,18 @@ def wind_turbines_list() -> flask.Response:
     return flask.jsonify(readings)
 
 
+@datagen_bp.route('/add-fault/<wt_id>', methods=['GET'])
+def add_fault(wt_id: str) -> flask.Response:
+    ns = get_ns()
+    if hasattr(ns, 'add_faults'):
+        add_faults = ns.add_faults
+    else:
+        add_faults = []
+    add_faults.append(wt_id)
+    ns.add_faults = add_faults
+    return flask.jsonify({'msg': 'success'})
+
+
 @datagen_bp.route('/wind-turbines/<wt_id>', methods=['GET'])
 def wind_turbines_detail(wt_id: str) -> Tuple[flask.Response, int]:
     readings = get_ns().readings_queue[-1]['wts']

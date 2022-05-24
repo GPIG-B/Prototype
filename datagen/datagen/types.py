@@ -23,6 +23,8 @@ logger = logging.getLogger('datagen')
 
 T = TypeVar('T')
 
+P = 1e-8
+
 
 # The `Any`s below should really be `ReadingsT`, but mypy does not support
 # cyclic type definitions yet.
@@ -260,7 +262,7 @@ class Rotor(Component):
         self.rps = max(0, rps)
 
 
-@WindTurbine.wt_fault(1e-8)
+@WindTurbine.wt_fault(P)
 @dataclass
 class RotorBladeSurfaceCrack(Fault):
     # Severety of the fault
@@ -298,7 +300,7 @@ class Generator(Component):
                       / (wt.model.rotor_rpm / env.cfg.ticks_per_minute))
 
 
-@WindTurbine.wt_fault(1e-8)
+@WindTurbine.wt_fault(P)
 @dataclass
 class GeneratorDamage(Fault):
     # Severety of the fault

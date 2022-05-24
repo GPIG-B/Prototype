@@ -24,6 +24,10 @@ loggers:
     level: INFO
     handlers: [console]
     propagate: no
+  drone_sched:
+    level: INFO
+    handlers: [console]
+    propagate: no
   api:
     level: INFO
     handlers: [console]

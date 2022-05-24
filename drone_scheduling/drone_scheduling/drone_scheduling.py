@@ -1,3 +1,4 @@
+from typing import List
 import numpy as np
 import csv
 import random
@@ -7,11 +8,11 @@ from logging import getLogger
 
 from .drone import Drone, Status
 from . import utils
+from .utils import LAT_BIAS, LNG_BIAS
 from .scheduler import Scheduler
 
 
 logger = getLogger('drone_sched')
-
 
 # Constants
 STATION_DRONE_NO = 5
@@ -20,7 +21,7 @@ SIMULATION_SPEED = 600
 MFACTOR_LAT = 0.45 / 50000 # 1metre in lat/long coordinates (roughly)
 MFACTOR_LONG = 0.9 / 59000
 STATION_RANGE = 5000 # Range of station in metres
-WT_INSPECTION_TIME = 15 * 60
+WT_INSPECTION_TIME = 5 * 60 * 60
 TIME_BETWEEN_FAULTS = 100 # seconds
 
 
@@ -33,13 +34,13 @@ blue = (0, 0, 255)
 orange = (255, 128, 0)
 
 
-def main():
+def main() -> None:
     width, height = 1800, 900
     pg.init()
     screen = pg.display.set_mode((width, height))
     stations = load_positions('drone_scheduling/stations.txt')
     turbines = load_positions('drone_scheduling/turbines.txt')
-    drones = intitialise_drones(stations)
+    drones = inititialise_drones(stations)
     scheduler = Scheduler()
     running = True
     clock = pg.time.Clock()
@@ -73,7 +74,8 @@ def main():
         render(screen, stations, turbines, drones)
 
 
-def generate_turbine_nodes(turbine, distance):
+def generate_turbine_nodes(turbine: np.ndarray, distance: float
+                           ) -> List[np.ndarray]:
     turbine_nodes = []
     lat1 = distance * MFACTOR_LAT
     long1 = distance * MFACTOR_LONG
@@ -96,7 +98,7 @@ def generate_turbine_nodes(turbine, distance):
     return turbine_nodes
 
 
-def load_positions(filepath):
+def load_positions(filepath: str) -> List[np.ndarray]:
     positions = []
     with open(filepath, 'r') as fd:
         reader = csv.reader(fd)
@@ -105,7 +107,7 @@ def load_positions(filepath):
     return positions
 
 
-def intitialise_drones(stations):
+def inititialise_drones(stations: List[np.ndarray]) -> List[Drone]:
     drones = []
     for x in range(len(stations)):
         for y in range(STATION_DRONE_NO):

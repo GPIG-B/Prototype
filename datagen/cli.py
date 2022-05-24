@@ -56,6 +56,7 @@ def main() -> None:
     # Write the static map data to Namespace.map_cfg
     with open(args.map) as fh:
         d = yaml.safe_load(fh)
+    client.get_ns().time_seconds = 0.
     client.get_ns().map_cfg = d
     # Initialise the simulation
     sim = _build_sim(args)
@@ -63,10 +64,20 @@ def main() -> None:
     def loop_callback(readings: dg.types.ReadingsT) -> None:
         """Write the simulation results to the global namespace."""
         ns = client.get_ns()
+        ns.time_seconds = sim.ticks * sim.cfg.tick_freq
         if not hasattr(ns, 'readings_queue'):
             ns.readings_queue = []
             logger.info('Initialised readings queue in global namespace')
         queue = ns.readings_queue
+        if hasattr(ns, 'add_faults'):
+            for wt_id in ns.add_faults:
+                wts = [w for w in sim.wts if w.id == wt_id]
+                if not wts:
+                    continue
+                wt = wts[0]
+                wt.faults.append(dg.types.RotorBladeSurfaceCrack(wt))
+                logger.info(f'Manually added a fault to WT[{wt.id}]')
+            ns.add_faults = []
         if len(queue) > sim.cfg.history_length:
             queue.pop()
         queue.insert(0, readings)

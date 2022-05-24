@@ -22,6 +22,11 @@ def index() -> flask.Response:
     return flask.jsonify(msg='Running', routes=routes)
 
 
+@api_bp.route('/drones', methods=['GET'])
+def drone_positions() -> flask.Response:
+    return flask.jsonify(get_ns().drone_positions)
+
+
 def get_ns() -> Namespace:
     ns = flask.current_app.config['MANAGER_CLIENT'].get_ns()
     return cast(Namespace, ns)

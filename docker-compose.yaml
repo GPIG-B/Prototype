@@ -28,6 +28,16 @@ services:
     depends_on:
       - manager
 
+  drone-sched:
+    image: gpig-drone-sched:latest
+    build:
+      context: .
+      dockerfile: ./drone_scheduling/Dockerfile
+    links:
+      - manager
+    depends_on:
+      - manager
+
   api:
     image: gpig-api:latest
     build:
