@@ -8,14 +8,13 @@ from logging import getLogger
 
 from .drone import Drone, Status
 from . import utils
-from .utils import LAT_BIAS, LNG_BIAS
 from .scheduler import Scheduler
 
 
 logger = getLogger('drone_sched')
 
 # Constants
-STATION_DRONE_NO = 5
+STATION_DRONE_NO = 1
 SCREEN_SIZE_FACTOR = 2000 # ratio from lat/long pg pixel size
 SIMULATION_SPEED = 600
 MFACTOR_LAT = 0.45 / 50000 # 1metre in lat/long coordinates (roughly)
