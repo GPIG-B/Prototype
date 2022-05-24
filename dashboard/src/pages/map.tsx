@@ -154,10 +154,10 @@ export default function Map({
 			})
 		})
 
-		drones.map(({ id, lat, lng }) => {
-			markers[id] = addMarker({
+		drones.map(({ drone_id, lat, lng }) => {
+			markers[drone_id] = addMarker({
 				...markerOptions,
-				title: id,
+				title: drone_id,
 				position: { lat, lng },
 				icon: 'drone-marker.png',
 				zIndex: 3,

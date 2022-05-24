@@ -31,7 +31,7 @@ export interface Map {
 	defaultZoom: number
 	minZoom: number
 	turbines: Array<{ id: string } & Coord>
-	drones: Array<{ id: string } & Coord>
+	drones: Drone[]
 	stations: Station[]
 }
 
