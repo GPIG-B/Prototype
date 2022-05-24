@@ -1,12 +1,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 
-import { Map as MapData } from '@/types'
-import {
-	DeviceStatus,
-	deviceStatuses,
-	statusThemes,
-} from '@/config/index.config'
+import { DeviceStatus, Map as MapData } from '@/types'
+import { deviceStatuses, statusThemes } from '@/config/index.config'
 import { capitalise } from '@/utils/index.utils'
 import { useSwr } from '@/utils/fetch.util'
 import SearchBox from '@/components/SearchBox'

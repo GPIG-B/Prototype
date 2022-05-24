@@ -1,5 +1,8 @@
+export type DeviceStatus = 'running' | 'warning' | 'failure' | 'idle'
+
 export interface Turbine {
 	wt_id: string
+	status: DeviceStatus
 	generator_temp: number
 	rotor_rps: number
 	tower_vib_freq: number
@@ -19,6 +22,8 @@ export interface Boundaries {
 
 type Drone = { id: string } & Coord
 
+type Station = { id: string } & Coord
+
 export interface Map {
 	area: Coord[]
 	boundaries: Boundaries
@@ -27,6 +32,7 @@ export interface Map {
 	minZoom: number
 	turbines: Array<{ id: string } & Coord>
 	drones: Drone[]
+	stations: Station[]
 }
 
 export interface Env {

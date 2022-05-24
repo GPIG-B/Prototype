@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import {
 	Chart as ChartJS,
 	CategoryScale,
@@ -21,7 +20,8 @@ import {
 	minWarningTurbineTemperature,
 } from '@/config/index.config'
 import { Turbine as TurbineData } from '@/types'
-import { useSwr } from '@/utils/fetch.util'
+import { capitalise } from '@/utils/index.utils'
+import { fetch, useSwr } from '@/utils/fetch.util'
 import Dropdown from '@/components/Dropdown'
 import LoadingSpinner from '@/components/LoadingSpinner'
 
@@ -33,7 +33,8 @@ const styles: Record<string, string> = {
 		'text-[0.875rem] text-blue-gray-600 px-[0.625rem] py-[0.25rem] border-blue-gray-600 border-[0.0625rem] rounded-[0.25rem] hover:text-white hover:bg-blue-gray-600 duration-100',
 	spinner: 'w-[3rem] h-[3rem]',
 	header: 'flex flex-row items-center justify-between mb-[3.25rem] lg:flex-col lg:items-start lg:gap-[1rem]',
-	innerHeader: 'flex flex-row items-center gap-[1.25rem] xl:gap-[0.75rem] lg:flex-wrap',
+	innerHeader:
+		'flex flex-row items-center gap-[1.25rem] xl:gap-[0.75rem] lg:flex-wrap',
 	title: 'm-0',
 	status: 'text-white text-[1rem] rounded-[0.25rem] h-[1.875rem] px-[0.5rem] flex items-center',
 	button: 'text-[0.875rem] text-blue-gray-600 px-[0.625rem] py-[0.25rem] border-blue-gray-600 border-[0.0625rem] rounded-[0.25rem] hover:text-white hover:bg-blue-gray-600 duration-100 whitespace-nowrap',
@@ -44,6 +45,7 @@ const styles: Record<string, string> = {
 	doughnutValue:
 		'font-semibold text-[1.75rem] text-blue-gray-600 absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2',
 	doughnutRange: 'flex flex-row justify-between items-center mx-[10%]',
+	containerCenter: 'w-full flex-1 flex justify-center items-center',
 }
 
 styles.doughnut = styles.graph + ' flex flex-col'
@@ -323,12 +325,13 @@ const getDoughnutData = ({
 	}
 }
 
-export default function Turbine() {
-	const { query: { id } } = useRouter()
-
-	const { data, error } = useSwr<TurbineData>('/wind-turbines/' + id, {
-		refreshInterval: 10_000,
-	})
+export default function Turbine({ id }: { id: string }) {
+	const { data, error, mutate } = useSwr<TurbineData>(
+		`/wind-turbines/${id}`,
+		{
+			refreshInterval: 10_000,
+		}
+	)
 
 	if (error)
 		return (
@@ -372,16 +375,32 @@ export default function Turbine() {
 		alert('Button clicked: ' + value)
 	}
 
+	const disableSensors = async () => {
+		await fetch(`/wind-turbines/${id}/disable`, {
+			method: 'post',
+		})
+		mutate()
+	}
+
+	const enableSensors = async () => {
+		await fetch(`/wind-turbines/${id}/enable`, {
+			method: 'post',
+		})
+		mutate()
+	}
+
 	return (
-		<div className="wrapper">
+		<div className="wrapper h-full flex flex-col">
 			<div className={styles.header}>
 				<div className={styles.innerHeader}>
 					<h1 className={styles.title}>{id}</h1>
 
 					<p
-						className={`${styles.status} ${statusThemes['running'].background}`}
+						className={`${styles.status} ${
+							statusThemes[data.status].background
+						}`}
 					>
-						Running
+						{capitalise(data.status)}
 					</p>
 				</div>
 
@@ -402,69 +421,103 @@ export default function Turbine() {
 						capitaliseValues
 					/>
 
-					<button className={styles.button}>Disable sensors</button>
+					{data.status === 'idle' ? (
+						<button
+							className={styles.button}
+							onClick={enableSensors}
+						>
+							Enable sensors
+						</button>
+					) : (
+						<button
+							className={styles.button}
+							onClick={disableSensors}
+						>
+							Disable sensors
+						</button>
+					)}
 				</div>
 			</div>
 
-			<div className={styles.container}>
-				<div className={`${styles.graph} turbine-rps`}>
-					<h3 className={styles.graphTitle}>Rotations per minute</h3>
-
-					<Line
-						data={getLineData('Rotations per minute', rpm)}
-						options={lineOptions}
-						style={{ maxWidth: '100%' }}
-					/>
+			{data.status === 'idle' ? (
+				<div className={styles.containerCenter}>
+					<p>This wind turbine's sensors are disabled</p>
 				</div>
+			) : (
+				<div className={styles.container}>
+					<div className={`${styles.graph} turbine-rps`}>
+						<h3 className={styles.graphTitle}>
+							Rotations per minute
+						</h3>
 
-				<div className={`${styles.doughnut} turbine-freq`}>
-					<h3 className={styles.doughnutTitle}>Frequency (Hz)</h3>
-
-					<div className={styles.doughnutContainer}>
-						<Doughnut
-							data={getDoughnutData(frequencyData)}
-							options={doughnutOptions}
+						<Line
+							data={getLineData('Rotations per minute', rpm)}
+							options={lineOptions}
 							style={{ maxWidth: '100%' }}
 						/>
-						<p className={styles.doughnutValue}>
-							{frequencyData.value}Hz
-						</p>
-						<div className={styles.doughnutRange}>
-							<span>0</span>
-							<span>{frequencyData.maxValue}</span>
+					</div>
+
+					<div className={`${styles.doughnut} turbine-freq`}>
+						<h3 className={styles.doughnutTitle}>Frequency (Hz)</h3>
+
+						<div className={styles.doughnutContainer}>
+							<Doughnut
+								data={getDoughnutData(frequencyData)}
+								options={doughnutOptions}
+								style={{ maxWidth: '100%' }}
+							/>
+							<p className={styles.doughnutValue}>
+								{frequencyData.value}Hz
+							</p>
+							<div className={styles.doughnutRange}>
+								<span>0</span>
+								<span>{frequencyData.maxValue}</span>
+							</div>
+						</div>
+					</div>
+
+					<div className={`${styles.graph} turbine-power`}>
+						<h3 className={styles.graphTitle}>
+							Power produced (kW/h)
+						</h3>
+
+						<Line
+							data={getLineData('Power produced (kW/h)', power)}
+							options={lineOptions}
+							style={{ maxWidth: '100%' }}
+						/>
+					</div>
+
+					<div className={`${styles.doughnut} turbine-temp`}>
+						<h3 className={styles.doughnutTitle}>
+							Temperature (°C)
+						</h3>
+
+						<div className={styles.doughnutContainer}>
+							<Doughnut
+								data={getDoughnutData(temperatureData)}
+								options={doughnutOptions}
+								style={{ maxWidth: '100%' }}
+							/>
+							<p className={styles.doughnutValue}>
+								{temperatureData.value}°C
+							</p>
+							<div className={styles.doughnutRange}>
+								<span>0</span>
+								<span>{temperatureData.maxValue}</span>
+							</div>
 						</div>
 					</div>
 				</div>
-
-				<div className={`${styles.graph} turbine-power`}>
-					<h3 className={styles.graphTitle}>Power produced (kW/h)</h3>
-
-					<Line
-						data={getLineData('Power produced (kW/h)', power)}
-						options={lineOptions}
-						style={{ maxWidth: '100%' }}
-					/>
-				</div>
-
-				<div className={`${styles.doughnut} turbine-temp`}>
-					<h3 className={styles.doughnutTitle}>Temperature (°C)</h3>
-
-					<div className={styles.doughnutContainer}>
-						<Doughnut
-							data={getDoughnutData(temperatureData)}
-							options={doughnutOptions}
-							style={{ maxWidth: '100%' }}
-						/>
-						<p className={styles.doughnutValue}>
-							{temperatureData.value}°C
-						</p>
-						<div className={styles.doughnutRange}>
-							<span>0</span>
-							<span>{temperatureData.maxValue}</span>
-						</div>
-					</div>
-				</div>
-			</div>
+			)}
 		</div>
 	)
+}
+
+export async function getServerSideProps({
+	params: { id },
+}: {
+	params: { id: string }
+}) {
+	return { props: { id } }
 }

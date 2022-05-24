@@ -6,6 +6,7 @@ import GoogleMapReact, { Coords, Size } from 'google-map-react'
 import { Map as MapData, Boundaries, Coord } from '@/types'
 import { iconSize } from '@/config/map.config'
 import { fetch, useSwr } from '@/utils/fetch.util'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 interface AddMarkerProps {
 	map: any
@@ -91,6 +92,9 @@ const styles = {
 	error: 'text-[1.25rem]',
 	errorButton:
 		'text-[0.875rem] text-blue-gray-600 px-[0.625rem] py-[0.25rem] border-blue-gray-600 border-[0.0625rem] rounded-[0.25rem] hover:text-white hover:bg-blue-gray-600 duration-100',
+	spinner: 'w-[3rem] h-[3rem]',
+	spinnerContainer:
+		'absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] z-0',
 }
 
 export default function Map({
@@ -102,6 +106,7 @@ export default function Map({
 	area,
 	turbines,
 	drones,
+	stations,
 }: MapProps) {
 	const {
 		query: { device },
@@ -156,6 +161,16 @@ export default function Map({
 				title: id,
 				position: { lat, lng },
 				icon: 'drone-marker.png',
+				zIndex: 3,
+			})
+		})
+
+		stations.map(({ id, lat, lng }) => {
+			markers[id] = addMarker({
+				...markerOptions,
+				title: id,
+				position: { lat, lng },
+				icon: 'station-marker.png',
 				zIndex: 2,
 			})
 		})
@@ -195,7 +210,13 @@ export default function Map({
 	}
 
 	return (
-		<div className="w-full h-full">
+		<div className="w-full h-full relative">
+			{Object.keys(markers).length === 0 && (
+				<div className={styles.spinnerContainer}>
+					<LoadingSpinner className={styles.spinner} />
+				</div>
+			)}
+
 			<GoogleMapReact
 				bootstrapURLKeys={{
 					key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,

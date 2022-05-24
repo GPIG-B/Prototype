@@ -1,4 +1,4 @@
-export type DeviceStatus = 'running' | 'warning' | 'failure' | 'idle'
+import { DeviceStatus } from '@/types'
 
 export const deviceStatuses = ['running', 'warning', 'failure', 'idle']
 
