@@ -88,7 +88,7 @@ export default function Drones() {
 		setSearchValue(e.target.value)
 
 	const onStatusFilterValueChange = (value: string) =>
-		setStatusFilterValue(value)
+		setStatusFilterValue(value?.toLowerCase())
 
 	const memoedData = useMemo(
 		() =>
