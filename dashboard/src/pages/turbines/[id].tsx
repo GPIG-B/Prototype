@@ -441,7 +441,7 @@ export default function Turbine({ id }: { id: string }) {
 
 			{data.status === 'idle' ? (
 				<div className={styles.containerCenter}>
-					<p>This wind turbine's sensors are disabled</p>
+					<p>This wind turbine&apos;s sensors are disabled</p>
 				</div>
 			) : (
 				<div className={styles.container}>
