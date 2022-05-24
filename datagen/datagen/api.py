@@ -19,7 +19,7 @@ def add_status(turbine, is_idle):
     if is_idle:
         status = "idle"
     elif len(turbine["_faults"]) > 0:
-        status = "failure"
+        status = "warning"
     else:
         status = "running"
     turbine["status"] = status
