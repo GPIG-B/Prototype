@@ -132,6 +132,7 @@ export default function Map({
 		if (!data || data.length === 0) return
 		data.map(({ drone_id, lat, lng }) => {
 			let marker = markers[drone_id]
+			console.log(`Marker for id ${drone_id} not found`)
 			marker?.setPosition({ lat, lng })
 		})
 	}, [data])
@@ -205,6 +206,7 @@ export default function Map({
 		}
 
 		// Set markers state
+		console.log(markers)
 		setMarkers(markers)
 	}
 
