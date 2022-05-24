@@ -34,7 +34,7 @@ def wind_turbines_list() -> flask.Response:
     return flask.jsonify(readings)
 
 
-@datagen_bp.route('/add-fault/<wt_id>', methods=['POST'])
+@datagen_bp.route('/add-fault/<wt_id>', methods=['GET', 'POST'])
 def add_fault(wt_id: str) -> flask.Response:
     ns = get_ns()
     if hasattr(ns, 'add_faults'):
