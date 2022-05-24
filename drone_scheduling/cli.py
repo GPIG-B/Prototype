@@ -50,7 +50,7 @@ def main() -> None:
             logger.info(f'Scheduled drone inspection for WT[{wt_id}]')
         inspected = scheduler.update(drones)
         ds.update(spos, drones, dt)
-        positions = [{'drone_id': d.id,
+        positions = [{'drone_id': f'Drone_{d.id}',
                       'lat': float(d.abs_pos[0] + ds.LAT_BIAS),
                       'lng': float(d.abs_pos[1] + ds.LNG_BIAS),
                       'status': d.status.name.lower()}
