@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 
-import { DeviceStatus, Map as MapData } from '@/types'
-import { deviceStatuses, statusThemes } from '@/config/index.config'
+import { DroneStatus, Map as MapData } from '@/types'
+import { droneStatuses, statusThemes } from '@/config/index.config'
 import { capitalise } from '@/utils/index.utils'
 import { useSwr } from '@/utils/fetch.util'
 import SearchBox from '@/components/SearchBox'
@@ -11,7 +11,7 @@ import Table, { Column, Data as TableData } from '@/components/Table'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import ArrowRight from '@/public/arrow-right.svg'
 
-const statusFilters = ['all', ...deviceStatuses]
+const statusFilters = ['all', ...droneStatuses]
 
 const styles = {
 	wrapper: 'wrapper min-h-full flex flex-col',
@@ -43,7 +43,7 @@ const columns: Column[] = [
 
 type Datum = {
 	id: string
-	status: DeviceStatus | React.ReactElement<any, any>
+	status: DroneStatus | React.ReactElement<any, any>
 	actions?: React.ReactElement<any, any>
 }
 

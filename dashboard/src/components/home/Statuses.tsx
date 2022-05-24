@@ -1,9 +1,10 @@
-import { DeviceStatus } from '@/types'
+import { TurbineStatus, DroneStatus } from '@/types'
 
 type StatusTheme = 'blue' | 'yellow' | 'red' | 'gray'
 
 interface StatusesProps {
-	wtStatuses: Record<DeviceStatus, number>
+	wtStatuses: Record<TurbineStatus, number>
+	drStatuses: Record<DroneStatus, number>
 	titleClassName: string
 }
 
@@ -55,6 +56,7 @@ const Status = ({ name, amount, theme }: StatusProps) => (
 
 export default function Statuses({
 	wtStatuses,
+	drStatuses,
 	titleClassName,
 }: StatusesProps) {
 	return (
@@ -90,10 +92,22 @@ export default function Statuses({
 				</h2>
 
 				<div className={styles.statusContainer}>
-					<Status name="running" amount={3} theme="blue" />
-					<Status name="warnings" amount={5} theme="yellow" />
-					<Status name="failures" amount={0} theme="red" />
-					<Status name="idle" amount={18} theme="gray" />
+					<Status
+						name="travelling"
+						amount={drStatuses.travelling}
+						theme="blue"
+					/>
+					<Status
+						name="warnings"
+						amount={drStatuses.warning}
+						theme="yellow"
+					/>
+					<Status
+						name="failures"
+						amount={drStatuses.failure}
+						theme="red"
+					/>
+					<Status name="idle" amount={drStatuses.idle} theme="gray" />
 				</div>
 			</div>
 		</div>

@@ -29,6 +29,7 @@ interface Marker {
 	setPosition(arg0: Coords): void
 	setIcon(arg0: Partial<MarkerIcon>): void
 	addListener(event: string, cb: () => void): void
+	setVisible(value: boolean): void
 }
 
 interface OpenPopupProps {
@@ -114,6 +115,25 @@ export default function Map({
 
 	const [markers, setMarkers] = useState<Record<string, Marker>>({})
 
+	const { data } = useSwr<Drone[]>('/drones', { refreshInterval: 1000 })
+
+	useEffect(() => {
+		if (!data || data.length === 0 || Object.keys(markers).length === 0)
+			return
+		data.map(({ drone_id, status, lat, lng }) => {
+			const marker = markers[drone_id]
+			if (marker) {
+				// @ts-ignore
+				if (status !== 'travelling') marker.setVisible(false)
+				else {
+					marker.setPosition({ lat, lng })
+					marker.setVisible(true)
+				}
+			}
+		})
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [data])
+
 	if (error)
 		return (
 			<div className={styles.wrapperCenter}>
@@ -125,17 +145,6 @@ export default function Map({
 				</Link>
 			</div>
 		)
-
-	const { data } = useSwr<Drone[]>('/drones', { refreshInterval: 5000 })
-
-	useEffect(() => {
-		if (!data || data.length === 0) return
-		data.map(({ drone_id, lat, lng }) => {
-			const marker = markers[drone_id]
-			if (!marker) console.log(`Marker for id ${drone_id} not found`)
-			marker?.setPosition({ lat, lng })
-		})
-	}, [data])
 
 	const handleApiLoaded = ({ map, maps }: any) => {
 		const infoWindow = new maps.InfoWindow()
@@ -206,7 +215,6 @@ export default function Map({
 		}
 
 		// Set markers state
-		console.log(markers)
 		setMarkers(markers)
 	}
 
