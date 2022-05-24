@@ -113,12 +113,14 @@ const generateHistoricalData = <T = unknown,>(values: T[]) => {
 	if (values.length === 0) return []
 	const now = new Date()
 	const dates: Date[] = []
-	for (let i = values.length - 1; i >= 0; i--) {
+	for (let i = 0; i < values.length; i++) {
 		const date = new Date()
 		date.setDate(now.getDate() - i)
 		dates.push(date)
 	}
-	return dates.map((date, i) => ({ value: values[i], timestamp: date }))
+	return dates
+		.map((date, i) => ({ value: values[i], timestamp: date }))
+		.reverse() // Oldest data first and most recent data last
 }
 
 interface GetDoughnutData {
@@ -175,7 +177,7 @@ export default function Turbine({ id }: { id: string }) {
 	const { data, error, mutate } = useSwr<TurbineData>(
 		`/wind-turbines/${id}`,
 		{
-			refreshInterval: 10_000,
+			refreshInterval: 1_000,
 		}
 	)
 
