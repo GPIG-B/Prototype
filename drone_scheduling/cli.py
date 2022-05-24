@@ -45,8 +45,9 @@ def main() -> None:
             except ValueError:
                 logger.error(f'Unknown WT id: {wt_id}')
                 continue
-            pos = np.array((float(entry['lat']), float(entry['lng'])))
-            scheduler.add_inspection(pos, wt_id)
+            pos = np.array((float(entry['lat']),
+                            float(entry['lng']))) - ds.utils.COORD_BIAS
+            scheduler.add_inspection(pos, wt_id)  # type: ignore
             logger.info(f'Scheduled drone inspection for WT[{wt_id}]')
         inspected = scheduler.update(drones)
         ds.update(spos, drones, dt)
@@ -58,6 +59,7 @@ def main() -> None:
         client.get_ns().drone_positions = positions
         for wt_id in inspected:
             logger.info(f'Finished drone inspection of WT[{wt_id}]')
+
         last_time = current_time
         time.sleep(1.)
 

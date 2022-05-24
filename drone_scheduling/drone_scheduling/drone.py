@@ -5,7 +5,6 @@ import numpy as np
 from .utils import norm
 from enum import Enum
 
-from . import drone_scheduling
 from .utils import COORD_BIAS
 
 logger = getLogger('drone_sched')
@@ -44,8 +43,9 @@ class Drone():
     battery = 100.0
 
     def move(self, delta: float) -> None:
-        # logger.info(f'Drone[{self.id}] located at: {self.abs_pos}')
         self.position += (self.velocity * delta)
+        # logger.info(f'Drone[{self.id}] located at: {self.abs_pos}, '
+        #             f'delta: {self.id}, dt: {delta}, vel: {self.velocity}')
         self.battery = self.battery - (CHARGE_COST * delta)
         if self.battery < 0:
             self.battery = 0
