@@ -10,6 +10,6 @@ WORKDIR /workdir/
 ADD ./drone_scheduling/requirements.txt ./
 RUN pip install -r requirements.txt
 ADD ./drone_scheduling/ ./
-RUN chmod +x ./cli.py ./entrypoint.sh
+RUN chmod +x ./cli2.py ./cli.py ./entrypoint.sh
 ADD ./configs/ /configs/
 ENTRYPOINT ./entrypoint.sh

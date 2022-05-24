@@ -1,6 +1,6 @@
-_ticks_per_second: 10.  # Only for the simulation loop
+_ticks_per_second: 1.  # Only for the simulation loop
 wts: 10  # Number of wind turbines
-tick_freq: 15 * 60  # seconds
+tick_freq: 60 * 60  # seconds
 # Wind
 wind_mag_mean: 9.5  # metres / second
 wind_mag_var: 7.0  # metres / second
@@ -28,4 +28,4 @@ tower_vib_freq_var: 240.0  # Hz
 gen_temp_diff_mean: 2.0  # degree Celsius
 gen_temp_diff_var: 0.5  # degree Celsius
 # Data
-history_length: 64
+history_length: 30

@@ -27,7 +27,7 @@ def add_status(turbine, is_idle):
 
 @datagen_bp.route('/wind-turbines', methods=['GET'])
 def wind_turbines_list() -> flask.Response:
-    readings = get_ns().readings_queue[-1]['wts']
+    readings = get_ns().readings_queue[0]['wts']
     IDLE_DEVICES = set(list_idle_devices())
     for turbine in readings:
         add_status(turbine, turbine["wt_id"] in IDLE_DEVICES)
@@ -49,7 +49,7 @@ def add_fault(wt_id: str) -> flask.Response:
 @datagen_bp.route('/wind-turbines/<wt_id>', methods=['GET'])
 def wind_turbines_detail(wt_id: str) -> Tuple[flask.Response, int]:
     readings = get_ns().readings_queue[-24:] # Get last 24 readings (24h if 1 tick = 1h) for historical data
-    wts = readings[-1]['wts']
+    wts = readings[0]['wts']
     filtered = [wt for wt in wts if wt['wt_id'] == wt_id]
     if not filtered:
         return flask.jsonify({'msg': 'Not found'}), 404
@@ -74,7 +74,7 @@ def wind_turbines_detail(wt_id: str) -> Tuple[flask.Response, int]:
 
 @datagen_bp.route('/wind-turbines/<wt_id>/disable', methods=['POST'])
 def wind_turbines_disable(wt_id: str) -> Tuple[flask.Response, int]:
-    readings = get_ns().readings_queue[-1]['wts']
+    readings = get_ns().readings_queue[0]['wts']
     filtered = [wt for wt in readings if wt['wt_id'] == wt_id]
     if not filtered:
         return flask.jsonify({'msg': 'Not found'}), 404
@@ -85,7 +85,7 @@ def wind_turbines_disable(wt_id: str) -> Tuple[flask.Response, int]:
 
 @datagen_bp.route('/wind-turbines/<wt_id>/enable', methods=['POST'])
 def wind_turbines_enable(wt_id: str) -> Tuple[flask.Response, int]:
-    readings = get_ns().readings_queue[-1]['wts']
+    readings = get_ns().readings_queue[0]['wts']
     filtered = [wt for wt in readings if wt['wt_id'] == wt_id]
     if not filtered:
         return flask.jsonify({'msg': 'Not found'}), 404
@@ -96,7 +96,7 @@ def wind_turbines_enable(wt_id: str) -> Tuple[flask.Response, int]:
 
 @datagen_bp.route('/env-sensors', methods=['GET'])
 def env_readings() -> flask.Response:
-    readings = copy(get_ns().readings_queue[-1])
+    readings = copy(get_ns().readings_queue[0])
     del readings['wts']
     return flask.jsonify(readings)
 

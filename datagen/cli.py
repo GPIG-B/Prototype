@@ -65,6 +65,13 @@ def main() -> None:
         """Write the simulation results to the global namespace."""
         ns = client.get_ns()
         ns.time_seconds = sim.ticks * sim.cfg.tick_freq
+        if hasattr(ns, 'finished_inspections'):
+            for wt_id in ns.finished_inspections:
+                wts = [w for w in sim.wts if w.id == wt_id]
+                if not wts:
+                    continue
+                wt = wts[0]
+                wt.faults = []
         if not hasattr(ns, 'readings_queue'):
             ns.readings_queue = []
             logger.info('Initialised readings queue in global namespace')
