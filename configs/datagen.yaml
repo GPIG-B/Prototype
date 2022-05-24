@@ -1,10 +1,6 @@
 _ticks_per_second: 1.  # Only for the simulation loop
 wts: 10  # Number of wind turbines
-<<<<<<< HEAD
 tick_freq: 60 * 60  # seconds
-=======
-tick_freq: 5 * 60  # seconds
->>>>>>> a2045fd191556978a21700759114494076ce13ee
 # Wind
 wind_mag_mean: 9.5  # metres / second
 wind_mag_var: 7.0  # metres / second
