@@ -4,6 +4,6 @@ set -e
 
 DIR=$(dirname "$0")
 
-$DIR/cli.py \
+$DIR/cli2.py \
     --manager_host manager \
     --manager_port 6789

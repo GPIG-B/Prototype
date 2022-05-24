@@ -62,5 +62,5 @@ def _get_fprob(df: pd.DataFrame, col: str, threshold: float = -0.05,
                     .groupby('wt_id')
                     [f'{col}_fprob']
                     # See: https://github.com/pandas-dev/pandas/issues/38523
-                    .apply(lambda x: x.rolling(50, min_periods=25).mean()))
+                    .apply(lambda x: x.rolling(30, min_periods=20).mean()))
     return df[['wt_id', 'smooth']]
