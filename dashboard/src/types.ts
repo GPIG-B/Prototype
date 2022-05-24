@@ -1,8 +1,10 @@
-export type DeviceStatus = 'running' | 'warning' | 'failure' | 'idle'
+export type TurbineStatus = 'running' | 'warning' | 'failure' | 'idle'
+
+export type DroneStatus = 'travelling' | 'warning' | 'failure' | 'idle'
 
 export interface Turbine {
 	wt_id: string
-	status: DeviceStatus
+	status: TurbineStatus
 	generator_temp: number
 	rotor_rps: number
 	tower_vib_freq: number
@@ -22,7 +24,7 @@ export interface Boundaries {
 
 export type Drone = {
 	drone_id: string
-	status: DeviceStatus
+	status: DroneStatus
 } & Coord
 
 type Station = { id: string } & Coord

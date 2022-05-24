@@ -1,12 +1,28 @@
-import { DeviceStatus } from '@/types'
+import { TurbineStatus, DroneStatus } from '@/types'
 
-export const deviceStatuses = ['running', 'warning', 'failure', 'idle']
+export const turbineStatuses: TurbineStatus[] = [
+	'running',
+	'warning',
+	'failure',
+	'idle',
+]
+
+export const droneStatuses: DroneStatus[] = [
+	'travelling',
+	'warning',
+	'failure',
+	'idle',
+]
 
 export const statusThemes: Record<
-	DeviceStatus,
+	TurbineStatus | DroneStatus,
 	{ background: string; text: string }
 > = {
 	running: {
+		background: 'bg-blue-600',
+		text: 'text-blue-600',
+	},
+	travelling: {
 		background: 'bg-blue-600',
 		text: 'text-blue-600',
 	},

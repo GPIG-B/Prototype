@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { Turbine } from '@/types'
+import { Turbine, Drone } from '@/types'
 import { useSwr } from '@/utils/fetch.util'
 import Statuses from '@/components/home/Statuses'
 import Logs from '@/components/home/Logs'
@@ -19,23 +19,37 @@ const styles = {
 }
 
 export default function Home() {
-	const { data, error } = useSwr<Turbine[]>('/wind-turbines')
+	const { data: wtData, error: wtError } = useSwr<Turbine[]>(
+		'/wind-turbines',
+		{ refreshInterval: 30_000 }
+	)
+	const { data: drData, error: drError } = useSwr<Drone[]>('/drones', {
+		refreshInterval: 30_000,
+	})
 
 	const wtStatuses = useMemo(() => {
 		const statuses = { running: 0, failure: 0, warning: 0, idle: 0 }
-		if (!data) return statuses
-		const a = data.reduce((a, v) => {
+		if (!wtData) return statuses
+		return wtData.reduce((a, v) => {
 			a[v.status] += 1
 			return a
 		}, statuses)
-		return a
-	}, [data])
+	}, [wtData])
+
+	const drStatuses = useMemo(() => {
+		const statuses = { travelling: 0, failure: 0, warning: 0, idle: 0 }
+		if (!drData) return statuses
+		return drData.reduce((a, v) => {
+			a[v.status] += 1
+			return a
+		}, statuses)
+	}, [drData])
 
 	return (
 		<div className={styles.wrapper}>
 			<h1>Dashboard</h1>
 
-			{!data && !error ? (
+			{(!wtData && !wtError) || (!drData && !drError) ? (
 				<div className={styles.fullContent}>
 					<LoadingSpinner className={styles.spinner} />
 				</div>
@@ -44,6 +58,7 @@ export default function Home() {
 					<div className={styles.main}>
 						<Statuses
 							wtStatuses={wtStatuses}
+							drStatuses={drStatuses}
 							titleClassName={styles.subtitle}
 						/>
 						<Logs
