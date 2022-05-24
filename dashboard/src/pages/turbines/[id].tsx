@@ -118,7 +118,9 @@ const generateHistoricalData = <T = unknown,>(values: T[]) => {
 		date.setDate(now.getDate() - i)
 		dates.push(date)
 	}
-	return dates.map((date, i) => ({ value: values[i], timestamp: date }))
+	return dates
+		.map((date, i) => ({ value: values[i], timestamp: date }))
+		.reverse() // Oldest data first and most recent data last
 }
 
 interface GetDoughnutData {
