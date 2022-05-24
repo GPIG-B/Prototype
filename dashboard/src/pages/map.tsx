@@ -123,7 +123,6 @@ export default function Map({
 		data.map(({ drone_id, status, lat, lng }) => {
 			const marker = markers[drone_id]
 			if (marker) {
-				// @ts-ignore
 				if (status !== 'travelling') marker.setVisible(false)
 				else {
 					marker.setPosition({ lat, lng })
@@ -131,8 +130,7 @@ export default function Map({
 				}
 			}
 		})
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [data])
+	}, [data, markers])
 
 	if (error)
 		return (
