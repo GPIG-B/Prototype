@@ -69,7 +69,7 @@ export default function Drones() {
 			)
 
 			const actions = (
-				<Link href={`/map?device=${drone.id}`}>
+				<Link href={`/map?device=${drone.drone_id}`}>
 					<a target="_self" className={styles.action}>
 						<span>View in map</span>
 						<div className={styles.actionIcon}>
@@ -78,7 +78,7 @@ export default function Drones() {
 					</a>
 				</Link>
 			)
-			return { id: drone.id, status, actions }
+			return { id: drone.drone_id, status, actions }
 		})
 
 		setDrones(drones)
