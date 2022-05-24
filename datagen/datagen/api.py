@@ -48,13 +48,27 @@ def add_fault(wt_id: str) -> flask.Response:
 
 @datagen_bp.route('/wind-turbines/<wt_id>', methods=['GET'])
 def wind_turbines_detail(wt_id: str) -> Tuple[flask.Response, int]:
-    readings = get_ns().readings_queue[-1]['wts']
-    filtered = [wt for wt in readings if wt['wt_id'] == wt_id]
+    readings = get_ns().readings_queue[-24:] # Get last 24 readings (24h if 1 tick = 1h) for historical data
+    wts = readings[-1]['wts']
+    filtered = [wt for wt in wts if wt['wt_id'] == wt_id]
     if not filtered:
         return flask.jsonify({'msg': 'Not found'}), 404
     assert len(filtered) == 1
+
     turbine = filtered[0]
     add_status(turbine, is_idle_device(turbine["wt_id"]))
+
+    rotor_rps = []
+    power = []
+
+    for reading in readings:
+        wt = [wt for wt in reading['wts'] if wt['wt_id'] == wt_id][0]
+        rotor_rps.append(wt['rotor_rps'])
+        power.append(wt['power'])
+
+    turbine['rotor_rps'] = rotor_rps
+    turbine['power'] = power
+
     return flask.jsonify(turbine), 200
 
 
