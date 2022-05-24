@@ -89,7 +89,10 @@ def env_readings() -> flask.Response:
 
 @datagen_bp.route('/map', methods=['GET'])
 def map_() -> flask.Response:
-    return flask.jsonify(get_ns().map_cfg)
+    m = get_ns().map_cfg
+    drones = get_ns().drone_positions
+    m['drones'] = drones
+    return flask.jsonify(m)
 
 
 def get_ns() -> Namespace:
