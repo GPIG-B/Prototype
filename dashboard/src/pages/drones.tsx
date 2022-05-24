@@ -61,10 +61,10 @@ export default function Drones() {
 
 		const drones: Data = data.drones.map((drone) => {
 			const theme =
-				statusThemes['running' /* drone.status */ as DeviceStatus]
+				statusThemes[drone.status]
 			const status = (
 				<p className={`${styles.status} ${theme.background}`}>
-					{capitalise('running' /* drone.status */ as string)}
+					{capitalise(drone.status)}
 				</p>
 			)
 
