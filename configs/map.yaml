@@ -75,31 +75,31 @@ minZoom: 11
 
 # Stations
 stations:
-- id: Station_001
+- station_id: Station_001
   lat: 53.873999999999995
   lng: 1.7005
-- id: Station_002
+- station_id: Station_002
   lat: 53.8615
   lng: 1.8185
-- id: Station_003
+- station_id: Station_003
   lat: 53.942499999999995
   lng: 1.754
-- id: Station_004
+- station_id: Station_004
   lat: 53.856
   lng: 1.96
-- id: Station_005
+- station_id: Station_005
   lat: 53.9205
   lng: 1.8595
-- id: Station_006
+- station_id: Station_006
   lat: 53.857
   lng: 2.0895
-- id: Station_007
+- station_id: Station_007
   lat: 53.916
   lng: 2.004
-- id: Station_008
+- station_id: Station_008
   lat: 53.856
   lng: 2.181
-- id: Station_009
+- station_id: Station_009
   lat: 53.916
   lng: 2.1145
 
