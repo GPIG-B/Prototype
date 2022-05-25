@@ -50,8 +50,8 @@ export const minDangerTurbineFrequency = 6000
 
 export const minWarningTurbineFrequency = 4400
 
-export const maxTurbineTemperature = 120
+export const maxTurbineTemperature = 100
 
-export const minDangerTurbineTemperature = 80
+export const minDangerTurbineTemperature = 50
 
-export const minWarningTurbineTemperature = 50
+export const minWarningTurbineTemperature = 25

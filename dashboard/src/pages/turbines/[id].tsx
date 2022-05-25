@@ -22,7 +22,7 @@ import {
 import { Turbine as TurbineData } from '@/types'
 import { capitalise } from '@/utils/index.utils'
 import { fetch, useSwr } from '@/utils/fetch.util'
-import Dropdown from '@/components/Dropdown'
+// import Dropdown from '@/components/Dropdown'
 import LoadingSpinner from '@/components/LoadingSpinner'
 
 const styles: Record<string, string> = {
@@ -104,7 +104,7 @@ const doughnutOptions = {
 
 const dateToString = (date: Date) => {
 	if (!date) return
-	let month = date.getMonth().toString()
+	let month = (date.getMonth() + 1).toString()
 	if (month.length === 1) month = '0' + month
 	return `${date.getDate()}/${month}`
 }
@@ -176,9 +176,7 @@ const getDoughnutData = ({
 export default function Turbine({ id }: { id: string }) {
 	const { data, error, mutate } = useSwr<TurbineData>(
 		`/wind-turbines/${id}`,
-		{
-			refreshInterval: 1_000,
-		}
+		{ refreshInterval: 5000 }
 	)
 
 	if (error)
@@ -216,7 +214,7 @@ export default function Turbine({ id }: { id: string }) {
 		minWarningValue: minWarningTurbineTemperature,
 	}
 
-	const rpm = generateHistoricalData(data.rotor_rps.map((rps) => rps / 60))
+	const rpm = generateHistoricalData(data.rotor_rps)
 	const power = generateHistoricalData(
 		data.power.map((power) => power / 1000)
 	)
@@ -237,11 +235,11 @@ export default function Turbine({ id }: { id: string }) {
 
 	const generateFault = () => fetch(`/add-fault/${id}`, { method: 'post' })
 
-	const onRequestInspectionClick = (value: string) => {
+	/* const onRequestInspectionClick = (value: string) => {
 		if (value === 'Request drone inspection') {
 			generateFault()
 		} else alert('Button clicked: ' + value)
-	}
+	} */
 
 	return (
 		<div className="wrapper h-full flex flex-col">
@@ -305,11 +303,11 @@ export default function Turbine({ id }: { id: string }) {
 				<div className={styles.container}>
 					<div className={`${styles.graph} turbine-rps`}>
 						<h3 className={styles.graphTitle}>
-							Rotations per minute
+							Rotations per second
 						</h3>
 
 						<Line
-							data={getLineData('Rotations per minute', rpm)}
+							data={getLineData('Rotations per second', rpm)}
 							options={lineOptions}
 							style={{ maxWidth: '100%' }}
 						/>
