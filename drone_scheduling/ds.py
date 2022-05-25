@@ -21,6 +21,7 @@ from dataclasses import dataclass, field
 from typing import Optional, Any, List, Dict, Union, ClassVar
 from enum import Enum, auto
 from logging import getLogger
+import numpy as np
 
 from manager import Client
 
@@ -141,16 +142,27 @@ def loop(client: Client, drones: List[Drone]) -> None:
         fault_queue = list(set(fault_queue).union(set(sensor_alerts)))
         finished_inspections: List[str] = []
         sensor_alerts: List[str] = client.get_ns().sensor_alerts
+        # Assign the closest idle drone to each fault
+        for alerted_wt_id in sensor_alerts:
+            idle_drones = [d for d in drones if d.state == State.IDLE]
+            if not idle_drones:
+                break
+            # Get the position of the WT
+            wts = [t for t in wt_dicts if t['id'] == alerted_wt_id]
+            if not wts:
+                logger.error(f'Unknown WT id: {alerted_wt_id}')
+                continue
+            wt_dict, *_ = wts
+            wt_pos = Vec.from_lat_lng(wt_dict)
+            distances = [(d.pos - wt_pos).mag() for d in idle_drones]
+            index: int = int(np.argmin(np.array(distances)))
+            closest_drone = idle_drones[index]
+            closest_drone.set_target(wt_pos, alerted_wt_id)
+            logger.info(f'Assigned {closest_drone} to WT{alerted_wt_id}')
+        # Update non-idle drones
         for drone in drones:
             if drone.state == State.IDLE:
-                if not sensor_alerts:
-                    continue
-                alerted_wt_id: str = sensor_alerts.pop()
-                # Get the position of the WT
-                wt_dict, *_ = [t for t in wt_dicts if t['id'] == alerted_wt_id]
-                wt_pos = Vec.from_lat_lng(wt_dict)
-                drone.set_target(wt_pos, alerted_wt_id)
-                logger.info(f'Assigned {drone} to WT{alerted_wt_id}')
+                continue
             elif drone.state == State.TRAVELLING:
                 assert drone.target_pos is not None
                 assert drone.target_id is not None

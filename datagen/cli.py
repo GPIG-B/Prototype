@@ -82,7 +82,8 @@ def main() -> None:
                 if not wts:
                     continue
                 wt = wts[0]
-                wt.faults.append(dg.types.RotorBladeSurfaceCrack(wt))
+                wt.faults.append(dg.types.RotorBladeSurfaceCrack(
+                    wt, rps_factor=0.9))
                 logger.info(f'Manually added a fault to WT[{wt.id}]')
             ns.add_faults = []
         if len(queue) > sim.cfg.history_length:
