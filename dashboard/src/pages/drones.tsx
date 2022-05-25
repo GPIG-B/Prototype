@@ -60,8 +60,7 @@ export default function Drones() {
 		if (!data) return
 
 		const drones: Data = data.drones.map((drone) => {
-			const theme =
-				statusThemes[drone.status]
+			const theme = statusThemes[drone.status]
 			const status = (
 				<p className={`${styles.status} ${theme.background}`}>
 					{capitalise(drone.status)}

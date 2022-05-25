@@ -48,3 +48,11 @@ export interface Env {
 	wave_mag: number
 	visibility: number
 }
+
+export type LogLevel = 'info' | 'warning' | 'failure'
+
+export interface Log {
+	level: LogLevel
+	msg: string
+	time_seconds: number
+}

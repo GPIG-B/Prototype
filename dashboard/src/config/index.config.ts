@@ -1,4 +1,4 @@
-import { TurbineStatus, DroneStatus } from '@/types'
+import { TurbineStatus, DroneStatus, LogLevel } from '@/types'
 
 export const turbineStatuses: TurbineStatus[] = [
 	'running',
@@ -40,9 +40,7 @@ export const statusThemes: Record<
 	},
 }
 
-export type LogStatus = 'failure' | 'warning' | 'info'
-
-export const logStatuses = ['failure', 'warning', 'info']
+export const logStatuses: LogLevel[] = ['info', 'warning', 'failure']
 
 export const maxTurbineFrequency = 8000
 

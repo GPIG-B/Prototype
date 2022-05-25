@@ -1,20 +1,20 @@
 import Link from 'next/link'
 
+import { LogLevel } from '@/types'
 import FailureIcon from '@/public/failure-icon.svg'
 import WarningIcon from '@/public/warning-icon.svg'
 import InfoIcon from '@/public/info-icon.svg'
 
-type LogType = 'failure' | 'warning' | 'info'
-
-interface LogsProps {
-	className: string
-	titleClassName: string
-}
-
 interface LogProps {
-	type: LogType
+	type: LogLevel
 	message: string
 	timestamp: Date
+}
+
+interface LogsProps {
+	logs: LogProps[]
+	className: string
+	titleClassName: string
 }
 
 const dateToString = (date: Date): string | undefined => {
@@ -46,38 +46,11 @@ const dateToString = (date: Date): string | undefined => {
 	return `${dateString} at ${time}`
 }
 
-const icons: Record<LogType, any> = {
+const icons: Record<LogLevel, any> = {
 	failure: <FailureIcon />,
 	warning: <WarningIcon />,
 	info: <InfoIcon />,
 }
-
-const logs: LogProps[] = [
-	{
-		type: 'failure',
-		message:
-			'Lorem ipsum dolor sit amet consectetur adipiscing elit, morbi vitae auctor odio',
-		timestamp: new Date(1651048613000),
-	},
-	{
-		type: 'warning',
-		message:
-			'Lorem ipsum dolor sit amet consectetur adipiscing elit, morbi vitae auctor odio',
-		timestamp: new Date(1651001847000),
-	},
-	{
-		type: 'warning',
-		message:
-			'Lorem ipsum dolor sit amet consectetur adipiscing elit, morbi vitae auctor odio',
-		timestamp: new Date(1650884367000),
-	},
-	{
-		type: 'failure',
-		message:
-			'Lorem ipsum dolor sit amet consectetur adipiscing elit, morbi vitae auctor odio',
-		timestamp: new Date(1650705327000),
-	},
-]
 
 const styles = {
 	header: 'flex flex-row justify-between items-center mb-[0.75rem]',
@@ -101,7 +74,7 @@ const Log = ({ type, message, timestamp }: LogProps) => (
 	</div>
 )
 
-export default function Logs({ className, titleClassName }: LogsProps) {
+export default function Logs({ logs, className, titleClassName }: LogsProps) {
 	return (
 		<div className={className}>
 			<div className={styles.header}>
@@ -113,11 +86,15 @@ export default function Logs({ className, titleClassName }: LogsProps) {
 				</Link>
 			</div>
 
-			<div className={styles.container}>
-				{logs.map((props, index) => (
-					<Log {...props} key={index} />
-				))}
-			</div>
+			{logs.length === 0 ? (
+				<p className="text-[1rem] mt-[2rem]">No logs found</p>
+			) : (
+				<div className={styles.container}>
+					{logs.map((props, i) => (
+						<Log {...props} key={i} />
+					))}
+				</div>
+			)}
 		</div>
 	)
 }

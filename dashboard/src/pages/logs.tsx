@@ -1,15 +1,19 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
-import { LogStatus, logStatuses } from '@/config/index.config'
+import { Log } from '@/types'
+import { logStatuses } from '@/config/index.config'
 import { capitalise } from '@/utils/index.utils'
+import { useSwr } from '@/utils/fetch.util'
 import Dropdown from '@/components/Dropdown'
-import Table, { Column } from '@/components/Table'
+import Table, { Column, Data as TableData } from '@/components/Table'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import FailureIcon from '@/public/failure-icon.svg'
 import WarningIcon from '@/public/warning-icon.svg'
 import InfoIcon from '@/public/info-icon.svg'
 
 const statusFilters = ['all', ...logStatuses]
+
+const BASE_TIMESTAMP = 1653553800000
 
 const styles = {
 	wrapper: 'wrapper min-h-full flex flex-col',
@@ -37,58 +41,6 @@ const columns: Column[] = [
 	},
 ]
 
-type Datum = {
-	type: LogStatus | React.ReactElement<any, any>
-	message: string | React.ReactElement<any, any>
-	timestamp: Date
-	date?: React.ReactElement<any, any>
-}
-
-const data: Datum[] = [
-	{
-		type: 'failure',
-		message:
-			'Lorem ipsum dolor sit amet consectetur adipiscing elit, morbi vitae auctor odio',
-		timestamp: new Date(1651048613000),
-	},
-	{
-		type: 'warning',
-		message:
-			'Lorem ipsum dolor sit amet consectetur adipiscing elit, morbi vitae auctor odio',
-		timestamp: new Date(1651001847000),
-	},
-	{
-		type: 'warning',
-		message:
-			'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur diam felis, euismod vel imperdiet in, volutpat ut neque. Donec scelerisque mi ut lectus congue, eu ultricies lorem varius. Sed nisl quam, imperdiet eget commodo ut, dapibus quis tortor. Suspendisse feugiat nulla neque, sit amet pretium tortor iaculis vitae. Nam condimentum nisi ac ultricies blandit. Phasellus vel massa id sem consectetur mollis vestibulum quis justo. Vivamus sed commodo purus. Pellentesque sit amet velit condimentum, finibus quam at, viverra augue.',
-		timestamp: new Date(1650884367000),
-	},
-	{
-		type: 'failure',
-		message:
-			'Lorem ipsum dolor sit amet consectetur adipiscing elit, morbi vitae auctor odio',
-		timestamp: new Date(1650705327000),
-	},
-	{
-		type: 'info',
-		message:
-			'Lorem ipsum dolor sit amet consectetur adipiscing elit, morbi vitae auctor odio',
-		timestamp: new Date(1650705087000),
-	},
-	{
-		type: 'failure',
-		message:
-			'Lorem ipsum dolor sit amet consectetur adipiscing elit, morbi vitae auctor odio',
-		timestamp: new Date(1650705087000),
-	},
-	{
-		type: 'warning',
-		message:
-			'Lorem ipsum dolor sit amet consectetur adipiscing elit, morbi vitae auctor odio',
-		timestamp: new Date(1648830633000),
-	},
-]
-
 const iconFromType: Record<string, any> = {
 	failure: <FailureIcon />,
 	warning: <WarningIcon />,
@@ -110,13 +62,15 @@ const dateToString = (date: Date): string | undefined => {
 		date.getFullYear() == now.getFullYear()
 
 	const timePeriod = date.getHours() < 12 ? 'am' : 'pm'
-	const time = `${date.getHours()}:${date.getMinutes()}${timePeriod}`
+	let minutes = date.getMinutes().toString()
+	if (minutes.length === 1) minutes = '0' + minutes
+	const time = `${date.getHours()}:${minutes}${timePeriod}`
 
 	let dateString: string
 	if (isToday) dateString = 'Today'
 	else if (isYesterday) dateString = 'Yesterday'
 	else {
-		let month = date.getMonth().toString()
+		let month = (date.getMonth() + 1).toString()
 		if (month.length === 1) month = '0' + month
 		dateString = `${date.getDate()}/${month}`
 	}
@@ -124,40 +78,62 @@ const dateToString = (date: Date): string | undefined => {
 	return `${dateString} at ${time}`
 }
 
-data.map((datum) => {
-	datum.type = (
-		<div className={styles.type}>
-			<div className={styles.icon}>{iconFromType[datum.type as string]}</div>
-			<p>{capitalise(datum.type as string)}</p>
-		</div>
-	)
-	datum.date = <p className={styles.date}>{dateToString(datum.timestamp)}</p>
-})
+type Datum = {
+	type: React.ReactElement<any, any>
+	message: string | React.ReactElement<any, any>
+	date: React.ReactElement<any, any>
+	timestamp: Date
+}
+
+type Data = TableData<Datum>
 
 export default function Logs() {
+	const [logs, setLogs] = useState<Data | null>()
 	const [statusFilterValue, setStatusFilterValue] = useState(statusFilters[0])
 
+	const { data } = useSwr<Log[]>('/logs', { refreshInterval: 10_000 })
+
+	useEffect(() => {
+		if (!data) return
+
+		const logs: Data = data
+			.map((datum) => {
+				const type = (
+					<div className={styles.type}>
+						<div className={styles.icon}>
+							{iconFromType[datum.level]}
+						</div>
+						<p>{capitalise(datum.level)}</p>
+					</div>
+				)
+				const timestamp = new Date(BASE_TIMESTAMP + datum.time_seconds)
+				const date = (
+					<p className={styles.date}>{dateToString(timestamp)}</p>
+				)
+				return { type, date, timestamp, message: datum.msg }
+			})
+			.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+
+		setLogs(logs)
+	}, [data])
+
 	const onStatusFilterValueChange = (value: string) =>
-		setStatusFilterValue(value)
+		setStatusFilterValue(value?.toLowerCase())
 
 	const memoedData = useMemo(
 		() =>
-			data
-				.filter((datum) => {
-					if (
-						statusFilterValue &&
-						statusFilterValue !== 'all' &&
-						(
-							datum.type as React.ReactElement<any, any>
-						).props.children[1].props.children.toLowerCase() !==
-							statusFilterValue
-					)
-						return false
+			logs?.filter((log) => {
+				if (
+					statusFilterValue &&
+					statusFilterValue !== 'all' &&
+					log.type.props.children[1].props.children.toLowerCase() !==
+						statusFilterValue
+				)
+					return false
 
-					return true
-				})
-				.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()),
-		[statusFilterValue]
+				return true
+			}),
+		[logs, statusFilterValue]
 	)
 
 	return (
@@ -175,11 +151,11 @@ export default function Logs() {
 				/>
 			</div>
 
-			{false ? (
+			{!memoedData ? (
 				<div className={styles.fullContent}>
 					<LoadingSpinner className={styles.spinner} />
 				</div>
-			) : false ? (
+			) : memoedData.length === 0 ? (
 				<p className="text-[1.125rem] mt-[2.5rem]">No logs found</p>
 			) : (
 				<Table columns={columns} data={memoedData} />
