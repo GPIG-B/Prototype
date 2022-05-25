@@ -59,7 +59,7 @@ def main() -> None:
     client.get_ns().time_seconds = 0.
     client.get_ns().map_cfg = d
     # Initialise the simulation
-    sim = _build_sim(args)
+    sim = _build_sim(args, client)
 
     def loop_callback(readings: dg.types.ReadingsT) -> None:
         """Write the simulation results to the global namespace."""
@@ -84,7 +84,9 @@ def main() -> None:
                 wt = wts[0]
                 wt.faults.append(dg.types.RotorBladeSurfaceCrack(
                     wt, rps_factor=0.9))
-                logger.info(f'Manually added a fault to WT[{wt.id}]')
+                msg = f'Manually added a fault to WT[{wt.id}]'
+                logger.info(msg)
+                client.log(msg, 'info')
             ns.add_faults = []
         if len(queue) > sim.cfg.history_length:
             queue.pop()
@@ -96,11 +98,12 @@ def main() -> None:
     sim.loop(loop_callback)
 
 
-def _build_sim(args: argparse.Namespace) -> dg.types.Simulation:
+def _build_sim(args: argparse.Namespace, client: manager.Client
+               ) -> dg.types.Simulation:
     cfg = dg.config.Config.from_yaml(args.config)
     env = dg.types.Environment.from_config(cfg)
     wts = dg.types.wind_turbines_from_config(env, args.map)
-    sim = dg.types.Simulation(cfg, wts, env)
+    sim = dg.types.Simulation(client, cfg, wts, env)
     logger.info('Starting warmup')
     sim.tick(args.warmup)
     logger.info('Done')

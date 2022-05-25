@@ -16,6 +16,7 @@ from .config import Config
 from .utils import Vec2, id_factory, smooth_step
 from .distributions import (make_temp_iter, make_wind_iter, make_wave_iter,
                             make_vis_iter)
+from manager import Client
 
 
 logger = logging.getLogger('datagen')
@@ -34,12 +35,17 @@ ReadingsT = Dict[str, ReadingT]
 
 @dataclass
 class Simulation:
+    client: Client
     cfg: Config = field(repr=False)
     wts: List[WindTurbine]
     env: Environment
     ticks: int = 0
     uptime: timedelta = field(default_factory=timedelta)
     running: bool = True
+
+    def __post_init__(self) -> None:
+        global _client
+        _client = self.client
 
     def get_readings(self) -> ReadingsT:
         # This is what will be written to the central Namespace
@@ -62,7 +68,8 @@ class Simulation:
 
     def loop(self, callback: Callable[[ReadingsT], None], max_ticks: int = -1,
              no_wait: bool = False) -> None:
-        logger.info('Simulation loop started')
+        msg = 'Simulation loop started'
+        logger.info(msg)
         while self.running and max_ticks != 0:
             readings = self.get_readings()
             callback(readings)
@@ -178,7 +185,9 @@ class WindTurbine:
         for fault_cls, prob in _wt_fault_types.items():
             if random.random() < prob * env.cfg.tick_freq:
                 new_fault = fault_cls(self)
-                logger.info(f'WT[{self.id}]: New fault {new_fault}')
+                msg = f'WT[{self.id}]: New fault {new_fault}'
+                logger.info(msg)
+                _client.log(msg)
                 self.faults.append(new_fault)
         # Call `after_tick` hooks on faults
         for fault in self.faults:

@@ -158,7 +158,9 @@ def loop(client: Client, drones: List[Drone]) -> None:
             index: int = int(np.argmin(np.array(distances)))
             closest_drone = idle_drones[index]
             closest_drone.set_target(wt_pos, alerted_wt_id)
-            logger.info(f'Assigned {closest_drone} to WT{alerted_wt_id}')
+            msg = f'Assigned {closest_drone} to WT[{alerted_wt_id}]'
+            logger.info(msg)
+            client.log(msg)
         # Update non-idle drones
         for drone in drones:
             if drone.state == State.IDLE:
@@ -170,7 +172,9 @@ def loop(client: Client, drones: List[Drone]) -> None:
                 if drone.is_close_to(drone.target_pos):
                     # The drone has reached the target
                     drone.state = State.INSPECTING
-                    logger.info(f'{drone} reached WT[{drone.target_id}]')
+                    msg = f'{drone} reached WT[{drone.target_id}]'
+                    logger.info(msg)
+                    client.log(msg)
             elif drone.state == State.INSPECTING:
                 if drone.inspection_ticks > 0:
                     drone.inspection_ticks -= 1
@@ -178,15 +182,18 @@ def loop(client: Client, drones: List[Drone]) -> None:
                 assert drone.target_id is not None
                 finished_inspections.append(drone.target_id)
                 drone.state = State.RETURNING
-                logger.info(f'{drone} finished inspection of'
-                            f' WT[{drone.target_id}]')
+                msg = f'{drone} finished inspection of WT[{drone.target_id}]'
+                logger.info(msg)
+                client.log(msg)
                 drone.erase_target()
             else:  # State.RETURNING
                 drone.move_towards(drone.station.pos)
                 if drone.is_close_to(drone.station.pos):
                     # The drone has reached the station
                     drone.state = State.IDLE
-                    logger.info(f'{drone} reached station')
+                    msg = f'{drone} reached station'
+                    logger.info(msg)
+                    client.log(msg)
         # Carry over previously finished inspections
         ns = client.get_ns()
         if not hasattr(ns, 'finished_inspections'):

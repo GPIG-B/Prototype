@@ -1,7 +1,7 @@
 from __future__ import annotations
 from multiprocessing.managers import (  # type: ignore
         BaseManager, NamespaceProxy, Namespace)
-from typing import cast
+from typing import cast, Dict, Any
 import logging
 import argparse
 import time
@@ -67,6 +67,9 @@ class Client:
         self.manager.register('on_connect_hook')
         self.manager.register('on_disconnect_hook')
         self._connect()
+        ns = self.get_ns()
+        if not hasattr(ns, 'logs'):
+            ns.logs = []
 
     def __del__(self) -> None:
         try:
@@ -102,6 +105,15 @@ class Client:
     def from_args(cls, name: str, args: argparse.Namespace) -> Client:
         h, p, k = args.manager_host, args.manager_port, args.manager_authkey
         return cls(name, h, p, k)
+
+    def log(self, msg: str, lvl: str = 'info') -> None:
+        ns = self.get_ns()
+        if not hasattr(ns, 'logs'):
+            ns.logs = []
+        logs = ns.logs
+        t = ns.time_seconds if hasattr(ns, 'time_seconds') else 0
+        logs.append({'msg': msg, 'level': lvl, 'time_seconds': t})
+        ns.logs = logs
 
 
 def add_manager_arguments(parser: argparse.ArgumentParser) -> None:

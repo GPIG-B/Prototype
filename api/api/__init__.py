@@ -21,6 +21,14 @@ def index() -> flask.Response:
     routes = [str(r) for r in flask.current_app.url_map.iter_rules()]
     return flask.jsonify(msg='Running', routes=routes)
 
+@api_bp.route('/logs')
+def logs() -> flask.Response:
+    ns = get_ns()
+    if not hasattr(ns, 'logs'):
+        return flask.jsonify([])
+    logs = ns.logs
+    return flask.jsonify(logs)
+
 
 @api_bp.route('/drones', methods=['GET'])
 def drone_positions() -> flask.Response:

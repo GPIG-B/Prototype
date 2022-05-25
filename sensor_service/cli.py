@@ -25,7 +25,9 @@ def main() -> None:
             continue
         alert_wt_ids = get_fault_alerts(ns.readings_queue)
         if alert_wt_ids:
-            logger.info(f'Alerts for: {alert_wt_ids}')
+            msg = f'Alerts for: {alert_wt_ids}'
+            logger.info(msg)
+            client.log(msg)
         ns.sensor_alerts = alert_wt_ids
         time.sleep(1.0)
 

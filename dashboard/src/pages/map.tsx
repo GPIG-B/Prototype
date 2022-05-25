@@ -245,7 +245,7 @@ export default function Map({
 }
 
 export async function getServerSideProps() {
-	const { data, error } = await fetch<MapData>('/map')
+	const { data, error } = await fetch<MapData>('/map', {baseURL: 'http://api:8080'})
 
 	let errorMessage: string | null = null
 	if (error)
