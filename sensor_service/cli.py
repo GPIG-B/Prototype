@@ -27,7 +27,7 @@ def main() -> None:
         if alert_wt_ids:
             msg = f'Alerts for: {alert_wt_ids}'
             logger.info(msg)
-            client.log(msg)
+            client.log(msg, 'warning')
         ns.sensor_alerts = alert_wt_ids
         time.sleep(1.0)
 

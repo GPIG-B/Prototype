@@ -86,7 +86,7 @@ def main() -> None:
                     wt, rps_factor=0.9))
                 msg = f'Manually added a fault to WT[{wt.id}]'
                 logger.info(msg)
-                client.log(msg, 'info')
+                client.log(msg, 'warning')
             ns.add_faults = []
         if len(queue) > sim.cfg.history_length:
             queue.pop()

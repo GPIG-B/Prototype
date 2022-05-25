@@ -187,7 +187,7 @@ class WindTurbine:
                 new_fault = fault_cls(self)
                 msg = f'WT[{self.id}]: New fault {new_fault}'
                 logger.info(msg)
-                _client.log(msg)
+                _client.log(msg, 'warning')
                 self.faults.append(new_fault)
         # Call `after_tick` hooks on faults
         for fault in self.faults:
